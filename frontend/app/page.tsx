@@ -22,6 +22,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import ReactMarkdown from 'react-markdown';
+import { CircularProgress } from '@mui/material';
 
 
 interface ChatMessage {
@@ -36,6 +37,7 @@ export default function ChatBotPage() {
   const [message, setMessage] = React.useState('');
   const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -57,7 +59,7 @@ export default function ChatBotPage() {
   };
 
   const handleSendMessage = async () => {
-    if (message.trim()) {
+    if (message.trim() && !isLoading) {
       const newMessage: ChatMessage = {
         id: Date.now(),
         text: message.trim(),
@@ -68,6 +70,7 @@ export default function ChatBotPage() {
       setChatMessages(prev => [...prev, newMessage]);
       const currentMessage = message.trim();
       setMessage('');
+      setIsLoading(true);
       
       try {
         // 会話履歴をAPIフォーマットに変換
@@ -114,6 +117,8 @@ export default function ChatBotPage() {
           timestamp: new Date()
         };
         setChatMessages(prev => [...prev, errorResponse]);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -380,7 +385,8 @@ export default function ChatBotPage() {
                 </Typography>
               </Box>
             ) : (
-              chatMessages.map((msg) => (
+              <>
+                {chatMessages.map((msg) => (
                 <Box 
                   key={msg.id}
                   sx={{ 
@@ -523,7 +529,64 @@ export default function ChatBotPage() {
                     </Avatar>
                   )}
                 </Box>
-              ))
+                ))}
+                
+                {/* Loading indicator */}
+                {isLoading && (
+                  <Box 
+                    sx={{ 
+                      mb: 3,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                      gap: 1
+                    }}
+                  >
+                    <Avatar sx={{ 
+                      width: 28, 
+                      height: 28,
+                      backgroundColor: '#10b981',
+                      mt: 0.5
+                    }}>
+                      <SmartToyIcon sx={{ fontSize: 16 }} />
+                    </Avatar>
+                    
+                    <Box sx={{
+                      maxWidth: '95%',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: '16px 16px 16px 4px',
+                          backgroundColor: '#ffffff',
+                          color: '#1e293b',
+                          border: '1px solid #e2e8f0',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+                        }}
+                      >
+                        <Box sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}>
+                          <CircularProgress size={16} sx={{ color: '#10b981' }} />
+                          <Typography variant="body2" sx={{ 
+                            lineHeight: 1.5,
+                            fontSize: '0.9rem',
+                            color: '#64748b',
+                            fontStyle: 'italic'
+                          }}>
+                            回答を生成中...
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Box>
+                  </Box>
+                )}
+              </>
             )}
             <div ref={chatEndRef} />
           </Box>
@@ -578,7 +641,7 @@ export default function ChatBotPage() {
               <Button
                 variant="contained"
                 onClick={handleSendMessage}
-                disabled={!message.trim()}
+                disabled={!message.trim() || isLoading}
                 sx={{ 
                   minWidth: 40,
                   width: 40,
