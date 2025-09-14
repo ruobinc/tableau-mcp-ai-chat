@@ -21,6 +21,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
+import ReactMarkdown from 'react-markdown';
 
 
 interface ChatMessage {
@@ -55,7 +56,7 @@ export default function ChatBotPage() {
     setIsChatOpen(!isChatOpen);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (message.trim()) {
       const newMessage: ChatMessage = {
         id: Date.now(),
@@ -65,25 +66,54 @@ export default function ChatBotPage() {
       };
       
       setChatMessages(prev => [...prev, newMessage]);
+      const currentMessage = message.trim();
       setMessage('');
       
-      // AI分析アシスタントの応答をシミュレート
-      setTimeout(() => {
-        const botResponse: ChatMessage = {
+      try {
+        const response = await fetch('http://localhost:8000/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: currentMessage,
+            timestamp: new Date().toISOString()
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const botResponse: ChatMessage = {
+            id: Date.now() + 1,
+            text: data.message,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setChatMessages(prev => [...prev, botResponse]);
+        } else {
+          throw new Error('API request failed');
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        const errorResponse: ChatMessage = {
           id: Date.now() + 1,
-          text: 'データ分析に関するご質問をありがとうございます。Tableauダッシュボードとの連携機能は次のステップで実装予定です。どのようなデータ分析をお手伝いしましょうか？',
+          text: '申し訳ありません。現在サーバーに接続できません。しばらく後にもう一度お試しください。',
           sender: 'bot',
           timestamp: new Date()
         };
-        setChatMessages(prev => [...prev, botResponse]);
-      }, 1000);
+        setChatMessages(prev => [...prev, errorResponse]);
+      }
     }
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSendMessage();
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      if (event.metaKey || event.ctrlKey) {
+        // Cmd+Enter または Ctrl+Enter で送信
+        event.preventDefault();
+        handleSendMessage();
+      }
+      // 普通のEnterは何もしない（デフォルトの改行動作）
     }
   };
 
@@ -243,7 +273,7 @@ export default function ChatBotPage() {
         {/* Right Panel - Chat Area */}
         <Slide direction="left" in={isChatOpen} mountOnEnter unmountOnExit>
           <Box sx={{
-            width: { xs: '100%', md: 400, lg: 450 },
+            width: { xs: '100%', md: 500, lg: 600 },
             display: 'flex',
             flexDirection: 'column',
             backgroundColor: '#ffffff',
@@ -361,7 +391,7 @@ export default function ChatBotPage() {
                   )}
                   
                   <Box sx={{
-                    maxWidth: '85%',
+                    maxWidth: '95%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}>
@@ -378,12 +408,82 @@ export default function ChatBotPage() {
                           '0 1px 3px rgba(0, 0, 0, 0.05)'
                       }}
                     >
-                      <Typography variant="body2" sx={{ 
-                        lineHeight: 1.5,
-                        fontSize: '0.9rem'
-                      }}>
-                        {msg.text}
-                      </Typography>
+                      {msg.sender === 'bot' ? (
+                        <Box sx={{ 
+                          '& p': { 
+                            margin: 0,
+                            lineHeight: 1.5,
+                            fontSize: '0.9rem'
+                          },
+                          '& h1, & h2, & h3, & h4, & h5, & h6': {
+                            margin: '0.5em 0',
+                            fontWeight: 600
+                          },
+                          '& ul, & ol': {
+                            margin: '0.5em 0',
+                            paddingLeft: '1.5em'
+                          },
+                          '& li': {
+                            margin: '0.2em 0'
+                          },
+                          '& code': {
+                            backgroundColor: '#f1f5f9',
+                            padding: '0.1em 0.3em',
+                            borderRadius: '4px',
+                            fontSize: '0.85em',
+                            color: '#1e293b'
+                          },
+                          '& pre': {
+                            backgroundColor: '#f8fafc',
+                            padding: '0.75em',
+                            borderRadius: '8px',
+                            overflow: 'auto',
+                            fontSize: '0.85em',
+                            margin: '0.5em 0',
+                            border: '1px solid #e2e8f0'
+                          },
+                          '& pre code': {
+                            backgroundColor: 'transparent',
+                            padding: 0
+                          },
+                          '& blockquote': {
+                            borderLeft: '3px solid #e2e8f0',
+                            paddingLeft: '1em',
+                            margin: '0.5em 0',
+                            color: '#64748b',
+                            fontStyle: 'italic'
+                          },
+                          '& strong': {
+                            fontWeight: 600
+                          },
+                          '& em': {
+                            fontStyle: 'italic'
+                          },
+                          '& table': {
+                            borderCollapse: 'collapse',
+                            width: '100%',
+                            margin: '0.5em 0'
+                          },
+                          '& th, & td': {
+                            border: '1px solid #e2e8f0',
+                            padding: '0.5em',
+                            textAlign: 'left'
+                          },
+                          '& th': {
+                            backgroundColor: '#f8fafc',
+                            fontWeight: 600
+                          }
+                        }}>
+                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" sx={{ 
+                          lineHeight: 1.5,
+                          fontSize: '0.9rem'
+                        }}>
+                          {msg.text}
+                        </Typography>
+                      )}
                     </Paper>
                     
                     <Typography 
@@ -435,10 +535,10 @@ export default function ChatBotPage() {
                 fullWidth
                 multiline
                 maxRows={3}
-                placeholder="データについて質問してください..."
+                placeholder="データについて質問してください... (⌘+Enter で送信)"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 variant="outlined"
                 size="small"
                 sx={{ 
