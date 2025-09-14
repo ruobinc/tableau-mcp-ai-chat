@@ -22,7 +22,8 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import ReactMarkdown from 'react-markdown';
-import { CircularProgress } from '@mui/material';
+import remarkGfm from 'remark-gfm';
+import { CircularProgress, Tooltip } from '@mui/material';
 import PreviewIcon from '@mui/icons-material/Preview';
 
 
@@ -31,6 +32,7 @@ interface ChatMessage {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  dashboardCode?: string; // 生成されたダッシュボードコードをキャッシュ
 }
 
 export default function ChatBotPage() {
@@ -80,7 +82,37 @@ export default function ChatBotPage() {
     }
   };
 
+  // HTMLダッシュボードコードを抽出する関数
+  const extractDashboardCode = (text: string): string | null => {
+    // HTMLコードが直接含まれている場合
+    const htmlMatch = text.match(/<!DOCTYPE html>[\s\S]*?<\/html>/i);
+    if (htmlMatch) {
+      return htmlMatch[0];
+    }
+    return null;
+  };
+
   const handlePreviewRequest = async (message: ChatMessage) => {
+    // 既にダッシュボードコードがキャッシュされている場合は再利用
+    if (message.dashboardCode) {
+      handleReactPreview(message.dashboardCode);
+      return;
+    }
+
+    // メッセージからHTMLダッシュボードコードを抽出
+    const extractedCode = extractDashboardCode(message.text);
+    if (extractedCode) {
+      // 抽出されたコードをメッセージにキャッシュ
+      setChatMessages(prev => prev.map(msg => 
+        msg.id === message.id 
+          ? { ...msg, dashboardCode: extractedCode }
+          : msg
+      ));
+      handleReactPreview(extractedCode);
+      return;
+    }
+
+    // HTMLコードが見つからない場合はAPIでダッシュボード生成
     setIsLoading(true);
     
     try {
@@ -97,7 +129,12 @@ export default function ChatBotPage() {
       
       if (response.ok) {
         const data = await response.json();
-        // レスポンスをそのままReactコードとして使用
+        // 生成されたコードをメッセージにキャッシュ
+        setChatMessages(prev => prev.map(msg => 
+          msg.id === message.id 
+            ? { ...msg, dashboardCode: data.code }
+            : msg
+        ));
         handleReactPreview(data.code);
       } else {
         throw new Error('API request failed');
@@ -396,44 +433,91 @@ export default function ChatBotPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(4px)',
               zIndex: 2000,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              p: 2
+              p: { xs: 1, sm: 2 },
+              animation: 'fadeIn 0.2s ease-out'
             }}>
               <Paper sx={{
-                width: '95%',
-                maxWidth: 1200,
-                height: '90%',
+                width: '98%',
+                maxWidth: 1600,
+                height: '95%',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                borderRadius: 3,
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                overflow: 'hidden',
+                animation: 'slideUp 0.3s ease-out'
               }}>
+                {/* Header with gradient background */}
                 <Box sx={{
-                  p: 2,
-                  borderBottom: '1px solid #e2e8f0',
+                  p: 3,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
                 }}>
-                  <Typography variant="h6">ダッシュボードプレビュー</Typography>
-                  <IconButton onClick={() => handleReactPreview()}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <BarChartIcon sx={{ fontSize: 24 }} />
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600,
+                      fontSize: '1.1rem'
+                    }}>
+                      ダッシュボードプレビュー
+                    </Typography>
+                  </Box>
+                  <IconButton 
+                    onClick={() => handleReactPreview()}
+                    sx={{ 
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': { 
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'white'
+                      }
+                    }}
+                  >
                     <CloseIcon />
                   </IconButton>
                 </Box>
-                <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-                  {reactCode && (
+                
+                {/* Content area with loading state */}
+                <Box sx={{ 
+                  flexGrow: 1, 
+                  position: 'relative',
+                  backgroundColor: '#f8fafc'
+                }}>
+                  {reactCode ? (
                     <iframe
                       srcDoc={reactCode}
                       style={{
                         width: '100%',
                         height: '100%',
                         border: 'none',
-                        backgroundColor: 'white'
+                        backgroundColor: 'white',
+                        borderRadius: '0 0 12px 12px'
                       }}
                       sandbox="allow-scripts"
                     />
+                  ) : (
+                    <Box sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      color: '#64748b'
+                    }}>
+                      <CircularProgress size={40} sx={{ color: '#667eea', mb: 2 }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        ダッシュボードを読み込み中...
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
               </Paper>
@@ -585,19 +669,31 @@ export default function ChatBotPage() {
                           '& table': {
                             borderCollapse: 'collapse',
                             width: '100%',
-                            margin: '0.5em 0'
+                            margin: '0.8em 0',
+                            fontSize: '0.85rem',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            borderRadius: '6px',
+                            overflow: 'hidden'
                           },
                           '& th, & td': {
                             border: '1px solid #e2e8f0',
-                            padding: '0.5em',
+                            padding: '0.75em 1em',
                             textAlign: 'left'
                           },
                           '& th': {
                             backgroundColor: '#f8fafc',
-                            fontWeight: 600
+                            fontWeight: 600,
+                            color: '#374151',
+                            borderBottom: '2px solid #d1d5db'
+                          },
+                          '& tbody tr:nth-of-type(even)': {
+                            backgroundColor: '#f9fafb'
+                          },
+                          '& tbody tr:hover': {
+                            backgroundColor: '#f3f4f6'
                           }
                         }}>
-                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                         </Box>
                       ) : (
                         <Typography variant="body2" sx={{ 
@@ -622,26 +718,33 @@ export default function ChatBotPage() {
                       {msg.timestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                     </Typography>
                     
-                    {/* React Preview Button - show for all bot messages (temporary for testing) */}
+                    {/* Dashboard Preview Button - show for bot messages */}
                     {msg.sender === 'bot' && (
                       <Box sx={{ mt: 1, ml: 1 }}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<PreviewIcon />}
-                          onClick={() => handlePreviewRequest(msg)}
-                          sx={{
-                            fontSize: '0.75rem',
-                            color: '#3b82f6',
-                            borderColor: '#3b82f6',
-                            '&:hover': {
-                              backgroundColor: '#f1f5f9',
-                              borderColor: '#2563eb'
-                            }
-                          }}
+                        <Tooltip 
+                          title={msg.dashboardCode || extractDashboardCode(msg.text) ? 'レポート再表示' : 'レポート作成'}
+                          placement="top"
+                          arrow
                         >
-                          プレビュー
-                        </Button>
+                          <IconButton
+                            size="small"
+                            onClick={() => handlePreviewRequest(msg)}
+                            sx={{
+                              color: msg.dashboardCode || extractDashboardCode(msg.text) ? '#10b981' : '#3b82f6',
+                              backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                              border: '1px solid',
+                              borderColor: msg.dashboardCode || extractDashboardCode(msg.text) ? '#10b981' : '#3b82f6',
+                              '&:hover': {
+                                backgroundColor: msg.dashboardCode || extractDashboardCode(msg.text) ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                                borderColor: msg.dashboardCode || extractDashboardCode(msg.text) ? '#059669' : '#2563eb',
+                                transform: 'scale(1.05)'
+                              },
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <PreviewIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     )}
                   </Box>
