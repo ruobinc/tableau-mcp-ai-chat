@@ -97,3 +97,75 @@ class DashboardGenerator:
                 final_text.append(content_item.text)
         
         return "\n".join(final_text)
+    
+    async def generate_chart_code(self, content: str) -> str:
+        """Generate Chart HTML code using Chart.js"""
+        
+        # チャート専用のシステムメッセージ
+        chart_system_prompt = """
+あなたはデータ分析結果を単一のチャートを使ってHTML+CSS+JavaScriptで可視化する専門家です。
+
+**絶対遵守：出力形式指示**
+あなたの回答は以下の条件を100%満たす必要があります：
+- レスポンス全体が <!DOCTYPE html> で開始し </html> で終了する
+- コードブロック記法（```、```html、```javascript等）は絶対使用禁止
+- バッククォート（`）は一切使用しない
+- アスタリスク（*）を使った強調は禁止
+- ハッシュ（#）を使った見出し記法は禁止
+- マイナス（-）を使ったリスト記法は禁止
+- 説明文、前置き、後書きは一切書かない
+- HTMLコード以外の文字は出力しない
+
+**チャート作成の指示:**
+1. 提供されたデータから最も適切な単一のチャートを選択（線グラフ、棒グラフ、円グラフ等）
+2. Chart.jsライブラリを使用してチャートを作成
+3. チャートはページ全体を使ってシンプルに表示
+4. データは実際の値を使用
+5. 美しい色使いとデザイン
+
+**チャートサイズ制限（必須遵守）:**
+- canvas要素のwidth属性は最大600を超えないこと
+- canvas要素のheight属性は最大300を超えないこと
+- チャートコンテナのCSS高さは300px-400px範囲に設定
+
+**出力形式（必ずこの通り）:**
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>チャート</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: white; }
+        .chart-container { width: 100%; height: 350px; }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
+    <script>
+        // Chart.js初期化コード
+    </script>
+</body>
+</html>
+"""
+        
+        # 単一メッセージとしてLLMに送信
+        messages = [
+            {"role": "user", "content": f"以下の分析結果から最適なチャートを1つ作成してください:\n\n{content}"}
+        ]
+        
+        response = self.bedrock_client.create_message(
+            messages=messages,
+            system=chart_system_prompt
+        )
+        
+        # レスポンスからテキストを抽出
+        final_text = []
+        for content_item in response.content:
+            if content_item.type == "text":
+                final_text.append(content_item.text)
+        
+        return "\n".join(final_text)

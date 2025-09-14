@@ -47,6 +47,11 @@ class MCPClient:
             env={
                 "SERVER": os.getenv("TABLEAU_SERVER"),
                 "SITE_NAME": os.getenv("TABLEAU_SITE_NAME"),
+                "AUTH": os.getenv("TABLEAU_AUTH"),
+                "JWT_SUB_CLAIM": os.getenv("TABLEAU_JWT_SUB_CLAIM"),
+                "CONNECTED_APP_CLIENT_ID": os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID"),
+                "CONNECTED_APP_CLIENT_SECRET": os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET"),
+                "CONNECTED_APP_SECRET_VALUE": os.getenv("TABLEAU_CONNECTED_APP_SECRET_VALUE"),
                 "PAT_NAME": os.getenv("TABLEAU_PAT_NAME"),
                 "PAT_VALUE": os.getenv("TABLEAU_PAT_VALUE"),
                 "DEFAULT_LOG_LEVEL": os.getenv("LOG_LEVEL", "debug"),

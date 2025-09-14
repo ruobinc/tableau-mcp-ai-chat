@@ -25,6 +25,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CircularProgress, Tooltip } from '@mui/material';
 import PreviewIcon from '@mui/icons-material/Preview';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 
 
 interface ChatMessage {
@@ -33,6 +34,8 @@ interface ChatMessage {
   sender: 'user' | 'bot';
   timestamp: Date;
   dashboardCode?: string; // 生成されたダッシュボードコードをキャッシュ
+  chartCode?: string; // 生成されたチャートコードをキャッシュ
+  showChart?: boolean; // チャート表示状態
 }
 
 export default function ChatBotPage() {
@@ -143,6 +146,51 @@ export default function ChatBotPage() {
       console.error('Error fetching preview code:', error);
       // エラー時はデフォルトコードでプレビューを開く
       handleReactPreview();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChartRequest = async (message: ChatMessage) => {
+    // チャート表示の切り替え
+    if (message.chartCode) {
+      // 既にチャートコードがある場合は表示切り替えのみ
+      setChatMessages(prev => prev.map(msg => 
+        msg.id === message.id 
+          ? { ...msg, showChart: !msg.showChart }
+          : msg
+      ));
+      return;
+    }
+
+    // チャートコードがない場合は生成
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/create_chart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: message.text,
+          timestamp: new Date().toISOString()
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // 生成されたチャートコードをメッセージにキャッシュして表示
+        setChatMessages(prev => prev.map(msg => 
+          msg.id === message.id 
+            ? { ...msg, chartCode: data.code, showChart: true }
+            : msg
+        ));
+      } else {
+        throw new Error('API request failed');
+      }
+    } catch (error) {
+      console.error('Error fetching chart code:', error);
     } finally {
       setIsLoading(false);
     }
@@ -718,9 +766,9 @@ export default function ChatBotPage() {
                       {msg.timestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                     </Typography>
                     
-                    {/* Dashboard Preview Button - show for bot messages */}
+                    {/* Action Buttons - show for bot messages */}
                     {msg.sender === 'bot' && (
-                      <Box sx={{ mt: 1, ml: 1 }}>
+                      <Box sx={{ mt: 1, ml: 1, display: 'flex', gap: 1 }}>
                         <Tooltip 
                           title={msg.dashboardCode || extractDashboardCode(msg.text) ? 'レポート再表示' : 'レポート作成'}
                           placement="top"
@@ -745,6 +793,76 @@ export default function ChatBotPage() {
                             <PreviewIcon sx={{ fontSize: 18 }} />
                           </IconButton>
                         </Tooltip>
+                        
+                        <Tooltip 
+                          title={msg.chartCode ? (msg.showChart ? 'チャート非表示' : 'チャート表示') : 'チャート作成'}
+                          placement="top"
+                          arrow
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleChartRequest(msg)}
+                            sx={{
+                              color: msg.chartCode ? (msg.showChart ? '#f59e0b' : '#10b981') : '#8b5cf6',
+                              backgroundColor: 'rgba(139, 92, 246, 0.05)',
+                              border: '1px solid',
+                              borderColor: msg.chartCode ? (msg.showChart ? '#f59e0b' : '#10b981') : '#8b5cf6',
+                              '&:hover': {
+                                backgroundColor: msg.chartCode ? (msg.showChart ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)') : 'rgba(139, 92, 246, 0.1)',
+                                borderColor: msg.chartCode ? (msg.showChart ? '#d97706' : '#059669') : '#7c3aed',
+                                transform: 'scale(1.05)'
+                              },
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <ShowChartIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    )}
+                    
+                    {/* Inline Chart Display */}
+                    {msg.sender === 'bot' && msg.showChart && msg.chartCode && (
+                      <Box sx={{ 
+                        mt: 2, 
+                        ml: 1,
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 2,
+                        backgroundColor: '#ffffff',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                      }}>
+                        <Box sx={{
+                          p: 2,
+                          borderBottom: '1px solid #e2e8f0',
+                          backgroundColor: '#f8fafc',
+                          borderRadius: '8px 8px 0 0'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            color: '#374151',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <ShowChartIcon sx={{ fontSize: 16 }} />
+                            チャート
+                          </Typography>
+                        </Box>
+                        <Box sx={{ 
+                          height: 400,
+                          overflow: 'hidden'
+                        }}>
+                          <iframe
+                            srcDoc={msg.chartCode}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              border: 'none',
+                              backgroundColor: 'white'
+                            }}
+                            sandbox="allow-scripts"
+                          />
+                        </Box>
                       </Box>
                     )}
                   </Box>

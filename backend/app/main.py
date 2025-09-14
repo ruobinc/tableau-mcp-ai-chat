@@ -119,5 +119,24 @@ async def create_report(request: CreateReportRequest) -> CreateReportResponse:
             success=False
         )
 
+@app.post("/api/create_chart", response_model=CreateReportResponse)
+async def create_chart(request: CreateReportRequest) -> CreateReportResponse:
+    try:
+        response_text = await dashboard_generator.generate_chart_code(request.content)
+        
+        return CreateReportResponse(
+            code=response_text,
+            timestamp=request.timestamp,
+            success=True
+        )
+        
+    except Exception as e:
+        print(f"Error creating chart: {e}")
+        return CreateReportResponse(
+            code="// エラーが発生しました",
+            timestamp=request.timestamp,
+            success=False
+        )
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
