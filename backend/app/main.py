@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List, Dict, Any
 import uvicorn
 from contextlib import asynccontextmanager
 
@@ -44,8 +45,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class ChatMessage(BaseModel):
+    role: str  # 'user' or 'assistant'
+    content: str
+
 class ChatRequest(BaseModel):
-    message: str
+    messages: List[ChatMessage]
     timestamp: str
 
 class ChatResponse(BaseModel):
@@ -60,8 +65,14 @@ async def root():
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     try:
+        # messagesリストをBedrockのフォーマットに変換
+        bedrock_messages = [
+            {"role": msg.role, "content": msg.content} 
+            for msg in request.messages
+        ]
+        
         # mcp.pyで全ての処理を実行
-        response_text = await mcp_client.process_query(request.message)
+        response_text = await mcp_client.process_query_with_history(bedrock_messages)
         
         return ChatResponse(
             message=response_text,

@@ -91,9 +91,8 @@ class MCPClient:
         result = await self.session.call_tool(tool_name, tool_args)
         return result
 
-    async def process_query(self, query: str) -> str:
-        """Process a query using Claude and available tools"""
-        messages = [{"role": "user", "content": query}]
+    async def process_query_with_history(self, messages: List[Dict[str, Any]]) -> str:
+        """Process a query using Claude and available tools with conversation history"""
         final_text = []
 
         # MCPが接続されている場合のみツールを使用

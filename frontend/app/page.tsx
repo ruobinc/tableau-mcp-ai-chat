@@ -70,13 +70,25 @@ export default function ChatBotPage() {
       setMessage('');
       
       try {
+        // 会話履歴をAPIフォーマットに変換
+        const historyMessages = chatMessages.map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+        
+        // 現在のメッセージを追加
+        const allMessages = [
+          ...historyMessages,
+          { role: 'user', content: currentMessage }
+        ];
+
         const response = await fetch('http://localhost:8000/api/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            message: currentMessage,
+            messages: allMessages,
             timestamp: new Date().toISOString()
           }),
         });
