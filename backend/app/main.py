@@ -6,16 +6,19 @@ import uvicorn
 from contextlib import asynccontextmanager
 
 from .tableau_mcp import MCPClient
+from .dashboard import DashboardGenerator
 
-# Global client
+# Global clients
 mcp_client: MCPClient = None
+dashboard_generator: DashboardGenerator = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    global mcp_client
+    global mcp_client, dashboard_generator
     
     mcp_client = MCPClient()
+    dashboard_generator = DashboardGenerator()
     
     # Try to connect to MCP server (optional - may fail if server not available)
     try:
@@ -53,6 +56,15 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     timestamp: str
 
+class CreateReportRequest(BaseModel):
+    content: str  # Bot message content to visualize
+    timestamp: str
+
+class CreateReportResponse(BaseModel):
+    code: str
+    timestamp: str
+    success: bool
+
 class ChatResponse(BaseModel):
     message: str
     timestamp: str
@@ -84,6 +96,25 @@ async def chat(request: ChatRequest) -> ChatResponse:
         print(f"Error processing chat request: {e}")
         return ChatResponse(
             message="申し訳ありません。現在システムでエラーが発生しています。しばらく後にもう一度お試しください。",
+            timestamp=request.timestamp,
+            success=False
+        )
+
+@app.post("/api/create_report", response_model=CreateReportResponse)
+async def create_report(request: CreateReportRequest) -> CreateReportResponse:
+    try:
+        response_text = await dashboard_generator.generate_dashboard_code(request.content)
+        
+        return CreateReportResponse(
+            code=response_text,
+            timestamp=request.timestamp,
+            success=True
+        )
+        
+    except Exception as e:
+        print(f"Error creating report: {e}")
+        return CreateReportResponse(
+            code="// エラーが発生しました",
             timestamp=request.timestamp,
             success=False
         )

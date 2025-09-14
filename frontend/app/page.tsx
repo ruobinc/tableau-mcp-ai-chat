@@ -24,7 +24,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import ReactMarkdown from 'react-markdown';
 import { CircularProgress } from '@mui/material';
 import PreviewIcon from '@mui/icons-material/Preview';
-import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 
 
 interface ChatMessage {
@@ -78,6 +77,37 @@ export default function ChatBotPage() {
     </div>
   );
 }`);
+    }
+  };
+
+  const handlePreviewRequest = async (message: ChatMessage) => {
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/create_report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: message.text,
+          timestamp: new Date().toISOString()
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // レスポンスをそのままReactコードとして使用
+        handleReactPreview(data.code);
+      } else {
+        throw new Error('API request failed');
+      }
+    } catch (error) {
+      console.error('Error fetching preview code:', error);
+      // エラー時はデフォルトコードでプレビューを開く
+      handleReactPreview();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -358,7 +388,7 @@ export default function ChatBotPage() {
             </Box>
           </Paper>
           
-          {/* React Preview Modal */}
+          {/* HTML Dashboard Preview Modal */}
           {showReactPreview && (
             <Box sx={{
               position: 'fixed',
@@ -374,9 +404,9 @@ export default function ChatBotPage() {
               p: 2
             }}>
               <Paper sx={{
-                width: '90%',
-                maxWidth: 800,
-                height: '80%',
+                width: '95%',
+                maxWidth: 1200,
+                height: '90%',
                 display: 'flex',
                 flexDirection: 'column'
               }}>
@@ -387,32 +417,23 @@ export default function ChatBotPage() {
                   alignItems: 'center',
                   justifyContent: 'space-between'
                 }}>
-                  <Typography variant="h6">React コンポーネントプレビュー</Typography>
+                  <Typography variant="h6">ダッシュボードプレビュー</Typography>
                   <IconButton onClick={() => handleReactPreview()}>
                     <CloseIcon />
                   </IconButton>
                 </Box>
                 <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
                   {reactCode && (
-                    <LiveProvider code={reactCode}>
-                      <Box sx={{ height: '100%', display: 'flex' }}>
-                        <Box sx={{ flex: 1, overflow: 'auto' }}>
-                          <Typography variant="subtitle2" sx={{ p: 1, backgroundColor: '#f5f5f5' }}>
-                            プレビュー
-                          </Typography>
-                          <Box sx={{ p: 2 }}>
-                            <LivePreview />
-                            <LiveError />
-                          </Box>
-                        </Box>
-                        <Box sx={{ flex: 1, borderLeft: '1px solid #e2e8f0' }}>
-                          <Typography variant="subtitle2" sx={{ p: 1, backgroundColor: '#f5f5f5' }}>
-                            コード
-                          </Typography>
-                          <LiveEditor style={{ height: 'calc(100% - 40px)', fontSize: '14px' }} />
-                        </Box>
-                      </Box>
-                    </LiveProvider>
+                    <iframe
+                      srcDoc={reactCode}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        backgroundColor: 'white'
+                      }}
+                      sandbox="allow-scripts"
+                    />
                   )}
                 </Box>
               </Paper>
@@ -608,7 +629,7 @@ export default function ChatBotPage() {
                           size="small"
                           variant="outlined"
                           startIcon={<PreviewIcon />}
-                          onClick={() => handleReactPreview()}
+                          onClick={() => handlePreviewRequest(msg)}
                           sx={{
                             fontSize: '0.75rem',
                             color: '#3b82f6',
