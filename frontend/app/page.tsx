@@ -23,6 +23,8 @@ import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import ReactMarkdown from 'react-markdown';
 import { CircularProgress } from '@mui/material';
+import PreviewIcon from '@mui/icons-material/Preview';
+import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 
 
 interface ChatMessage {
@@ -38,6 +40,8 @@ export default function ChatBotPage() {
   const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showReactPreview, setShowReactPreview] = React.useState(false);
+  const [reactCode, setReactCode] = React.useState('');
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -56,6 +60,25 @@ export default function ChatBotPage() {
 
   const handleChatToggle = () => {
     setIsChatOpen(!isChatOpen);
+  };
+
+
+  const handleReactPreview = (code?: string) => {
+    setShowReactPreview(!showReactPreview);
+    if (code) {
+      setReactCode(code);
+    } else if (!reactCode) {
+      // テスト用のサンプルコード
+      setReactCode(`function TestComponent() {
+  return (
+    <div style={{padding: '20px', backgroundColor: '#f0f0f0', borderRadius: '8px'}}>
+      <h2>テストレポート</h2>
+      <p>これはLLMから生成されたReactコンポーネントのテストです。</p>
+      <button onClick={() => alert('Hello!')}>クリックしてください</button>
+    </div>
+  );
+}`);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -335,6 +358,67 @@ export default function ChatBotPage() {
             </Box>
           </Paper>
           
+          {/* React Preview Modal */}
+          {showReactPreview && (
+            <Box sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: 2
+            }}>
+              <Paper sx={{
+                width: '90%',
+                maxWidth: 800,
+                height: '80%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <Box sx={{
+                  p: 2,
+                  borderBottom: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <Typography variant="h6">React コンポーネントプレビュー</Typography>
+                  <IconButton onClick={() => handleReactPreview()}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+                <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+                  {reactCode && (
+                    <LiveProvider code={reactCode}>
+                      <Box sx={{ height: '100%', display: 'flex' }}>
+                        <Box sx={{ flex: 1, overflow: 'auto' }}>
+                          <Typography variant="subtitle2" sx={{ p: 1, backgroundColor: '#f5f5f5' }}>
+                            プレビュー
+                          </Typography>
+                          <Box sx={{ p: 2 }}>
+                            <LivePreview />
+                            <LiveError />
+                          </Box>
+                        </Box>
+                        <Box sx={{ flex: 1, borderLeft: '1px solid #e2e8f0' }}>
+                          <Typography variant="subtitle2" sx={{ p: 1, backgroundColor: '#f5f5f5' }}>
+                            コード
+                          </Typography>
+                          <LiveEditor style={{ height: 'calc(100% - 40px)', fontSize: '14px' }} />
+                        </Box>
+                      </Box>
+                    </LiveProvider>
+                  )}
+                </Box>
+              </Paper>
+            </Box>
+          )}
+          
           {/* Messages Container */}
           <Box sx={{ 
             flexGrow: 1, 
@@ -516,6 +600,29 @@ export default function ChatBotPage() {
                     >
                       {msg.timestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                     </Typography>
+                    
+                    {/* React Preview Button - show for all bot messages (temporary for testing) */}
+                    {msg.sender === 'bot' && (
+                      <Box sx={{ mt: 1, ml: 1 }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<PreviewIcon />}
+                          onClick={() => handleReactPreview()}
+                          sx={{
+                            fontSize: '0.75rem',
+                            color: '#3b82f6',
+                            borderColor: '#3b82f6',
+                            '&:hover': {
+                              backgroundColor: '#f1f5f9',
+                              borderColor: '#2563eb'
+                            }
+                          }}
+                        >
+                          プレビュー
+                        </Button>
+                      </Box>
+                    )}
                   </Box>
                   
                   {msg.sender === 'user' && (
