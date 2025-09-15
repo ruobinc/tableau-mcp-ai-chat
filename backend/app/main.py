@@ -151,7 +151,7 @@ async def create_chart(request: CreateReportRequest) -> CreateReportResponse:
 async def generate_jwt(request: JWTRequest) -> JWTResponse:
     try:
         # 環境変数から設定を取得
-        secret_id = os.getenv("TABLEAU_CONNECTED_APP_SECRET_ID")
+        secret_id = os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET")
         secret_value = os.getenv("TABLEAU_CONNECTED_APP_SECRET_VALUE")
         client_id = os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID")
 

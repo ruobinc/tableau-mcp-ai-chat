@@ -39,7 +39,6 @@ class MCPClient:
         
         if not (is_python or is_js):
             raise ValueError("Server script must be a .py or .js file")
-
         command = "python" if is_python else "node"
         server_params = StdioServerParameters(
             command=command,
@@ -50,7 +49,7 @@ class MCPClient:
                 "AUTH": os.getenv("TABLEAU_AUTH"),
                 "JWT_SUB_CLAIM": os.getenv("TABLEAU_JWT_SUB_CLAIM"),
                 "CONNECTED_APP_CLIENT_ID": os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID"),
-                "CONNECTED_APP_CLIENT_SECRET": os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET"),
+                "CONNECTED_APP_SECRET_ID": os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET"),
                 "CONNECTED_APP_SECRET_VALUE": os.getenv("TABLEAU_CONNECTED_APP_SECRET_VALUE"),
                 "PAT_NAME": os.getenv("TABLEAU_PAT_NAME"),
                 "PAT_VALUE": os.getenv("TABLEAU_PAT_VALUE"),
@@ -105,7 +104,7 @@ class MCPClient:
             available_tools = await self.get_available_tools()
         else:
             available_tools = []
-
+        print(f"Available tools: {available_tools}")
         response = self.bedrock_client.create_message(
             messages=messages,
             tools=available_tools if available_tools else None,
