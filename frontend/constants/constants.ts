@@ -1,0 +1,2 @@
+// Next.jsでは process.env を使用
+export const tableauEmbeddedUrl = `${process.env.NEXT_PUBLIC_TABLEAU_SERVER_URL}/t/${process.env.NEXT_PUBLIC_TABLEAU_SITE_ID}/views/${process.env.NEXT_PUBLIC_TABLEAU_WORKBOOK_ID}/${process.env.NEXT_PUBLIC_TABLEAU_VIEW_NAME}`;

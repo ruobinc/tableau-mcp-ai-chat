@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import { tableauEmbeddedUrl } from '../constants/constants';
 
 interface TableauDashboardProps {
   username?: string;
@@ -18,11 +19,6 @@ export default function TableauDashboard({ username = 'default-user' }: TableauD
   const [error, setError] = useState<string>('');
   const [isMounted, setIsMounted] = useState(false);
 
-  // Tableau設定を環境変数から取得
-  const tableauServerUrl = process.env.TABLEAU_SERVER_URL;
-  const tableauSiteId = process.env.TABLEAU_SITE_ID;
-  const tableauWorkbookId = process.env.TABLEAU_WORKBOOK_ID;
-  const tableauViewName = process.env.TABLEAU_VIEW_NAME;
 
   // JWTトークンの取得
   const fetchJWTToken = useCallback(async (): Promise<void> => {
@@ -78,7 +74,7 @@ export default function TableauDashboard({ username = 'default-user' }: TableauD
   }
 
   // 環境変数が設定されていない場合の処理
-  if (!tableauServerUrl || !tableauSiteId || !tableauWorkbookId || !tableauViewName) {
+  if (!tableauEmbeddedUrl) {
     return (
       <Box sx={{
         display: 'flex',
@@ -159,7 +155,7 @@ export default function TableauDashboard({ username = 'default-user' }: TableauD
   }
 
   // Tableau Vizの表示URL構築（JWTトークン付き）
-  const vizUrl = `${tableauServerUrl}/t/${tableauSiteId}/views/${tableauWorkbookId}/${tableauViewName}?:embed=yes&:toolbar=no&:tabs=no&:token=${jwtToken}`;
+  const vizUrl = `${tableauEmbeddedUrl}?:embed=yes&:toolbar=no&:tabs=no&:token=${jwtToken}`;
 
   return (
     <Box sx={{

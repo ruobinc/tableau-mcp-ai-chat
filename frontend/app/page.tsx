@@ -394,7 +394,11 @@ export default function ChatBotPage() {
           <Box sx={{
             flexGrow: 1,
             backgroundColor: '#f8fafc',
-            position: 'relative'
+            position: 'relative',
+            pt: 2,
+            pb: 2,
+            pl: 2,
+            pr: 4
           }}>
             <TableauDashboard username="default-user" />
           </Box>
