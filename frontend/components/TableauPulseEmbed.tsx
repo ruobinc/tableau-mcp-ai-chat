@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { useJWTToken } from '../hooks/useJWTToken';
 
 interface TableauPulseEmbedProps {
   username?: string;
@@ -11,11 +12,6 @@ interface TableauPulseEmbedProps {
   width?: string | number;
 }
 
-interface JWTResponse {
-  token: string;
-  success: boolean;
-}
-
 export default function TableauPulseEmbed({
   username = 'default-user',
   metricId = '',
@@ -23,11 +19,11 @@ export default function TableauPulseEmbed({
   height = '100%',
   width = '100%'
 }: TableauPulseEmbedProps) {
-  const [jwtToken, setJwtToken] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
   const [isMounted, setIsMounted] = useState(false);
   const pulseRef = useRef<HTMLDivElement>(null);
+  const { jwtToken, loading: jwtLoading, error: jwtError } = useJWTToken(username);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   // Tableau Embedding APIの読み込み待機
   const waitForTableauAPI = (): Promise<void> => {
@@ -68,50 +64,10 @@ export default function TableauPulseEmbed({
     });
   };
 
-  // JWTトークンの取得
-  const fetchJWTToken = useCallback(async (): Promise<void> => {
-    try {
-      console.log('Fetching JWT token for username:', username);
-      const response = await fetch('http://localhost:8000/api/jwt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username }),
-      });
-
-      if (!response.ok) {
-        throw new Error('JWT取得に失敗しました');
-      }
-
-      const data: JWTResponse = await response.json();
-      console.log('JWT response received:', { success: data.success, tokenLength: data.token?.length });
-
-      if (data.success && data.token) {
-        setJwtToken(data.token);
-        setError('');
-        console.log('JWT token set successfully');
-      } else {
-        throw new Error('有効なJWTトークンが取得できませんでした');
-      }
-    } catch (err) {
-      console.error('JWT取得エラー:', err);
-      setError(err instanceof Error ? err.message : 'JWT取得に失敗しました');
-    } finally {
-      setLoading(false);
-    }
-  }, [username]);
-
   // クライアントサイドでのマウント状態を管理
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (isMounted) {
-      fetchJWTToken();
-    }
-  }, [isMounted, fetchJWTToken]);
 
   // Tableau Pulse初期化（JavaScript APIアプローチ）
   const initializePulse = useCallback(async () => {
@@ -288,7 +244,7 @@ export default function TableauPulseEmbed({
   }
 
   // ローディング中
-  if (loading) {
+  if (loading || jwtLoading) {
     return (
       <Box sx={{
         display: 'flex',
@@ -310,7 +266,7 @@ export default function TableauPulseEmbed({
   }
 
   // エラーが発生した場合
-  if (error) {
+  if (error || jwtError) {
     return (
       <Box sx={{
         display: 'flex',
@@ -321,7 +277,7 @@ export default function TableauPulseEmbed({
         p: 4
       }}>
         <Alert severity="error" sx={{ mb: 2, maxWidth: 400 }}>
-          {error}
+          {error || jwtError}
         </Alert>
         <Typography variant="body2" sx={{
           color: '#94a3b8',

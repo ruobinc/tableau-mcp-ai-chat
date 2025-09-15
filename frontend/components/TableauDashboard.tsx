@@ -1,72 +1,22 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { tableauEmbeddedUrl } from '../constants/constants';
+import { useJWTToken } from '../hooks/useJWTToken';
 
 interface TableauDashboardProps {
   username?: string;
 }
 
-interface JWTResponse {
-  token: string;
-  success: boolean;
-}
-
 export default function TableauDashboard({ username = 'default-user' }: TableauDashboardProps) {
-  const [jwtToken, setJwtToken] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
   const [isMounted, setIsMounted] = useState(false);
-
-
-  // JWTトークンの取得
-  const fetchJWTToken = useCallback(async (): Promise<void> => {
-    try {
-      const response = await fetch('http://localhost:8000/api/jwt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username }),
-      });
-
-      if (!response.ok) {
-        throw new Error('JWT取得に失敗しました');
-      }
-
-      const data: JWTResponse = await response.json();
-
-      if (data.success && data.token) {
-        setJwtToken(data.token);
-        setError('');
-      } else {
-        throw new Error('有効なJWTトークンが取得できませんでした');
-      }
-    } catch (err) {
-      console.error('JWT取得エラー:', err);
-      setError(err instanceof Error ? err.message : 'JWT取得に失敗しました');
-    } finally {
-      setLoading(false);
-    }
-  }, [username]);
+  const { jwtToken, loading, error } = useJWTToken(username);
 
   // クライアントサイドでのマウント状態を管理
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (isMounted) {
-      fetchJWTToken();
-    }
-  }, [isMounted, fetchJWTToken]);
-
-  useEffect(() => {
-    if (jwtToken) {
-      setLoading(false);
-    }
-  }, [jwtToken]);
 
   // サーバーサイドレンダリング時またはマウント前は何も表示しない
   if (!isMounted) {
@@ -176,7 +126,7 @@ export default function TableauDashboard({ username = 'default-user' }: TableauD
             console.log('Tableau iframe loaded successfully');
           }}
           onError={() => {
-            setError('ダッシュボードの読み込みに失敗しました');
+            console.error('ダッシュボードの読み込みに失敗しました');
           }}
         />
       ) : (

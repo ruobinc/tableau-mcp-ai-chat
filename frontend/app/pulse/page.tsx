@@ -5,8 +5,8 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import Navigation from '../../components/Navigation';
+import { pulseMetrics, pulseSiteName, tableauUserName } from '../../constants/constants';
 import dynamic from 'next/dynamic';
-
 const TableauPulseEmbed = dynamic(() => import('../../components/TableauPulseEmbedSimple'), {
   ssr: false,
   loading: () => null
@@ -49,7 +49,43 @@ export default function PulsePage() {
           </Box>
         </Paper>
 
-        {/* Tableau Pulse Embed Content */}
+        {/* Tableau Pulse Kanban Cards */}
+        <Box sx={{
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
+          p: 3
+        }}>
+          <Typography variant="h6" sx={{
+            fontWeight: 600,
+            color: '#1e293b',
+            fontSize: '1.1rem',
+            mb: 2
+          }}>
+            メトリクス ダッシュボード
+          </Typography>
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 3,
+            maxWidth: '100%',
+            overflowX: 'auto',
+            height: '480px'
+          }}>
+            {pulseMetrics.map((metric) => (
+              <TableauPulseEmbed
+                key={metric.id}
+                username={tableauUserName}
+                metricId={metric.id}
+                siteName={pulseSiteName}
+                width="100%"
+                height="480px"
+                layout="card"
+              />
+            ))}
+          </Box>
+        </Box>
+
+        {/* Main Tableau Pulse Embed Content */}
         <Box sx={{
           flexGrow: 1,
           position: 'relative',
@@ -57,13 +93,27 @@ export default function PulsePage() {
           overflow: 'hidden',
           minHeight: '800px'
         }}>
-          <TableauPulseEmbed
-            username="ruobin.chang@salesforce.com"
-            metricId="80bed8ec-9478-426b-a116-bcb3a6549b4b" // メトリクスIDを設定
-            siteName="ruobin-demo" // サイト名を設定
-            width="100%"
-            height="800px"
-          />
+          <Box sx={{
+            p: 3,
+            borderBottom: '1px solid #e2e8f0'
+          }}>
+            <Typography variant="h6" sx={{
+              fontWeight: 600,
+              color: '#1e293b',
+              fontSize: '1.1rem'
+            }}>
+              詳細メトリクス
+            </Typography>
+          </Box>
+          <Box sx={{ p: 3 }}>
+            <TableauPulseEmbed
+              username={tableauUserName}
+              metricId={pulseMetrics[0].id}
+              siteName={pulseSiteName}
+              width="100%"
+              height="800px"
+            />
+          </Box>
         </Box>
       </Box>
     </Box>
