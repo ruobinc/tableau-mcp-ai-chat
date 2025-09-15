@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 
 from .tableau_mcp import MCPClient
 from .dashboard import DashboardGenerator
+from .auth import generate_jwt_token
+import os
 
 # Global clients
 mcp_client: MCPClient = None
@@ -68,6 +70,13 @@ class CreateReportResponse(BaseModel):
 class ChatResponse(BaseModel):
     message: str
     timestamp: str
+    success: bool
+
+class JWTRequest(BaseModel):
+    username: str
+
+class JWTResponse(BaseModel):
+    token: str
     success: bool
 
 @app.get("/")
@@ -135,6 +144,38 @@ async def create_chart(request: CreateReportRequest) -> CreateReportResponse:
         return CreateReportResponse(
             code="// エラーが発生しました",
             timestamp=request.timestamp,
+            success=False
+        )
+
+@app.post("/api/jwt", response_model=JWTResponse)
+async def generate_jwt(request: JWTRequest) -> JWTResponse:
+    try:
+        # 環境変数から設定を取得
+        secret_id = os.getenv("TABLEAU_CONNECTED_APP_SECRET_ID")
+        secret_value = os.getenv("TABLEAU_CONNECTED_APP_SECRET_VALUE")
+        client_id = os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID")
+
+        if not all([secret_id, secret_value, client_id]):
+            raise ValueError("Tableau Connected App credentials not configured")
+
+        # JWTトークンを生成
+        token = generate_jwt_token(
+            secret_id=secret_id,
+            secret_value=secret_value,
+            client_id=client_id,
+            username=request.username,
+            token_expiry_minutes=5  # 5分間有効
+        )
+
+        return JWTResponse(
+            token=token,
+            success=True
+        )
+
+    except Exception as e:
+        print(f"Error generating JWT: {e}")
+        return JWTResponse(
+            token="",
             success=False
         )
 
