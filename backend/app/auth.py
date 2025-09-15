@@ -18,7 +18,7 @@ def generate_jwt_token(secret_id, secret_value, client_id, username, token_expir
         "exp": exp,
         "nbf": now,
         "jti": str(uuid.uuid4()),
-        "aud": "https://prod-apnortheast-a.online.tableau.com",
+        "aud": "tableau",
         "sub": username,
         "scp": scopes,
     }
