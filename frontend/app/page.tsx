@@ -26,6 +26,12 @@ import remarkGfm from 'remark-gfm';
 import { CircularProgress, Tooltip } from '@mui/material';
 import PreviewIcon from '@mui/icons-material/Preview';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import dynamic from 'next/dynamic';
+
+const TableauDashboard = dynamic(() => import('../components/TableauDashboard'), {
+  ssr: false,
+  loading: () => null // Hydration問題を避けるためnullを返す
+});
 
 
 interface ChatMessage {
@@ -387,41 +393,10 @@ export default function ChatBotPage() {
           {/* Dashboard Container */}
           <Box sx={{
             flexGrow: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             backgroundColor: '#f8fafc',
             position: 'relative'
           }}>
-            {/* Placeholder for Tableau Dashboard */}
-            <Box sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              p: 4
-            }}>
-              <BarChartIcon sx={{ 
-                fontSize: 80, 
-                color: '#cbd5e1', 
-                mb: 2 
-              }} />
-              <Typography variant="h6" sx={{ 
-                color: '#64748b',
-                fontWeight: 500,
-                mb: 1
-              }}>
-                Tableau ダッシュボード
-              </Typography>
-              <Typography variant="body2" sx={{ 
-                color: '#94a3b8',
-                maxWidth: 400,
-                lineHeight: 1.6
-              }}>
-                ここにTableauダッシュボードが表示されます。<br />
-                次のステップで統合する予定です。
-              </Typography>
-            </Box>
+            <TableauDashboard username="default-user" />
           </Box>
         </Box>
         
