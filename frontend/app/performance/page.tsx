@@ -25,6 +25,7 @@ import PreviewIcon from '@mui/icons-material/Preview';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import dynamic from 'next/dynamic';
 import Navigation from '../../components/Navigation';
+import { tableauUserName } from '../../constants/constants';
 
 const TableauDashboard = dynamic(() => import('../../components/TableauDashboard'), {
   ssr: false,
@@ -333,7 +334,7 @@ export default function PerformancePage() {
             pl: 2,
             pr: 4
           }}>
-            <TableauDashboard username="default-user" />
+            <TableauDashboard username={tableauUserName} />
           </Box>
         </Box>
 

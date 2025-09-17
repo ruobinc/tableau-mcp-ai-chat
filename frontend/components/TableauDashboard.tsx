@@ -2,16 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import { tableauEmbeddedUrl } from '../constants/constants';
+import { tableauEmbeddedUrl, tableauUserName } from '../constants/constants';
 import { useJWTToken } from '../hooks/useJWTToken';
 
 interface TableauDashboardProps {
   username?: string;
 }
 
-export default function TableauDashboard({ username = 'default-user' }: TableauDashboardProps) {
+const resolveUsername = (value?: string) => {
+  if (value && value !== 'undefined') {
+    return value;
+  }
+  if (tableauUserName && tableauUserName !== 'undefined') {
+    return tableauUserName;
+  }
+  return 'default-user';
+};
+
+export default function TableauDashboard({ username }: TableauDashboardProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { jwtToken, loading, error } = useJWTToken(username);
+  const resolvedUsername = resolveUsername(username);
+  const { jwtToken, loading, error } = useJWTToken(resolvedUsername);
 
   // クライアントサイドでのマウント状態を管理
   useEffect(() => {

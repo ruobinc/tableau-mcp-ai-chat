@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 
 interface JWTResponse {
   token: string;
@@ -114,10 +114,11 @@ export const JWTProvider: React.FC<JWTProviderProps> = ({
   defaultUsername = 'default-user'
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const tokenCache = new Map<string, Promise<string>>();
+  const tokenCacheRef = useRef<Map<string, Promise<string>>>(new Map());
 
   // JWTトークンを取得（キャッシュ優先、同じユーザーの重複リクエスト防止）
   const getToken = useCallback(async (username: string): Promise<string> => {
+    const tokenCache = tokenCacheRef.current;
     // 既に同じユーザー名でリクエスト中の場合は、そのPromiseを返す
     if (tokenCache.has(username)) {
       return tokenCache.get(username)!;
@@ -147,17 +148,18 @@ export const JWTProvider: React.FC<JWTProviderProps> = ({
       } finally {
         setIsLoading(false);
         // リクエスト完了後にキャッシュから削除
-        tokenCache.delete(username);
+        tokenCacheRef.current.delete(username);
       }
     })();
 
     // リクエストをキャッシュに保存
     tokenCache.set(username, tokenPromise);
     return tokenPromise;
-  }, [tokenCache]);
+  }, []);
 
   // トークンをクリアする関数
   const clearToken = useCallback((username?: string) => {
+    const tokenCache = tokenCacheRef.current;
     if (username) {
       // 特定ユーザーのトークンのみクリア
       const stored = localStorage.getItem(JWT_STORAGE_KEY);
@@ -177,7 +179,7 @@ export const JWTProvider: React.FC<JWTProviderProps> = ({
       localStorage.removeItem(JWT_STORAGE_KEY);
       tokenCache.clear();
     }
-  }, [tokenCache]);
+  }, []);
 
   // アプリケーション起動時にデフォルトユーザーのトークンを事前取得
   useEffect(() => {
