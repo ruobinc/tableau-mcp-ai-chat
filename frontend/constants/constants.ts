@@ -4,28 +4,25 @@ export const tableauUserName = `${process.env.NEXT_PUBLIC_TABLEAU_USER_NAME}`;
 // Tableau Pulse メトリクス設定
 export const pulseMetrics = [
   {
-    id: "80bed8ec-9478-426b-a116-bcb3a6549b4b",
-    name: "売上高",
-    description: "月次売上高の推移"
+    id: "d6cb961b-76a9-46d1-b6d6-c4710d3b0186",
+    name: "売上",
+    description: "売上のメトリクス"
   },
   {
-    // id: "7a244538-afe3-47a1-86c0-e9060a6ae9cd",
-    id: "7a244538-afe3-47a1-86c0-e9060a6ae9cd",
-    name: "利益率",
-    description: "月次利益率の推移"
+    id: "a1b0f9b5-5c85-420a-9a04-9ca32b012086",
+    name: "利益",
+    description: "利益のメトリクス"
   },
   {
-    id: "b6890fa4-44ce-4df5-b7b1-8e75d27cf11f",
-    // id: "ccc",
-    name: "顧客数",
-    description: "アクティブ顧客数の推移"
+    id: "6cdf2b36-c5ae-42a0-bfd2-f430a5529463",
+    name: "オーダー数",
+    description: "オーダー数のメトリクス"
   },
-  {
-    id: "e0c5ad0a-30bc-4394-8e35-068e0637cc8b",
-    // id: "aaa",
-    name: "コンバージョン率",
-    description: "月次コンバージョン率"
-  }
+  // {
+  //   id: "e0c5ad0a-30bc-4394-8e35-068e0637cc8b",
+  //   name: "コンバージョン率",
+  //   description: "月次コンバージョン率"
+  // }
 ];
 
 export const pulseSiteName = `${process.env.NEXT_PUBLIC_TABLEAU_SITE_ID}`;
