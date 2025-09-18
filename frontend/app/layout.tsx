@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { JWTProvider } from "../contexts/JWTContext";
 import { tableauUserName } from "../constants/constants";
+import ThemeRegistry from "../components/ThemeRegistry";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,9 +38,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <JWTProvider defaultUsername={tableauUserName}>
-          {children}
-        </JWTProvider>
+        <ThemeRegistry>
+          <JWTProvider defaultUsername={tableauUserName}>
+            {children}
+          </JWTProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );
