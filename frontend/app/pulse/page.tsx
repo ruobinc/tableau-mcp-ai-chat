@@ -20,7 +20,7 @@ export default function PulsePage() {
       flexDirection: 'column',
       backgroundColor: '#f8fafc'
     }}>
-      <Navigation title="メトリクス - Tableau Pulse" />
+      <Navigation title="次世代スーパーストア ダッシュボード" />
 
       {/* Main Content */}
       <Box sx={{
@@ -61,7 +61,7 @@ export default function PulsePage() {
             fontSize: '1.1rem',
             mb: 2
           }}>
-            メトリクス ダッシュボード
+            メトリクス一覧
           </Typography>
           <Box sx={{
             display: 'grid',
@@ -102,7 +102,7 @@ export default function PulsePage() {
               color: '#1e293b',
               fontSize: '1.1rem'
             }}>
-              詳細メトリクス
+              メトリクス詳細
             </Typography>
           </Box>
           <Box sx={{ p: 3 }}>

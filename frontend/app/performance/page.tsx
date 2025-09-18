@@ -287,7 +287,7 @@ export default function PerformancePage() {
       flexDirection: 'column',
       backgroundColor: '#f8fafc'
     }}>
-      <Navigation title="業績一覧 - Tableau Analytics Dashboard" />
+      <Navigation title="次世代スーパーストア  ダッシュボード" />
 
       {/* Main Content Area - Split Layout */}
       <Box sx={{

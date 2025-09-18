@@ -174,9 +174,9 @@ export default function HomePage() {
             letterSpacing: '-0.02em',
             lineHeight: 1.2
           }}>
-            Tableau Analytics
+            次世代スーパーストア
             <br />
-            Dashboard
+            ダッシュボード
           </Typography>
 
           {/* Enhanced Subtitle */}
@@ -286,7 +286,7 @@ export default function HomePage() {
                 lineHeight: 1.6,
                 mb: 2
               }}>
-                TableauダッシュボードとインテリジェントなAI分析アシスタントで包括的な業績分析
+                TableauダッシュボードとTableau MCPを活用したAI分析アシスタントで包括的な業績分析
               </Typography>
               <Button
                 variant="outlined"
@@ -378,7 +378,7 @@ export default function HomePage() {
                 lineHeight: 1.6,
                 mb: 2
               }}>
-                Tableau Pulseによるリアルタイム監視とインサイト自動検出システム
+                Tableau Pulseによるリアルタイム監視と生成AIによるインサイト発見
               </Typography>
               <Button
                 variant="outlined"
