@@ -107,11 +107,13 @@ const JWTContext = createContext<JWTContextType | null>(null);
 interface JWTProviderProps {
   children: ReactNode;
   defaultUsername?: string;
+  prefetchDefaultToken?: boolean;
 }
 
 export const JWTProvider: React.FC<JWTProviderProps> = ({
   children,
-  defaultUsername = 'default-user'
+  defaultUsername = 'default-user',
+  prefetchDefaultToken = false
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const tokenCacheRef = useRef<Map<string, Promise<string>>>(new Map());
@@ -181,14 +183,16 @@ export const JWTProvider: React.FC<JWTProviderProps> = ({
     }
   }, []);
 
-  // アプリケーション起動時にデフォルトユーザーのトークンを事前取得
+  // アプリケーション起動時の事前取得はオプションにする
   useEffect(() => {
-    if (defaultUsername) {
-      getToken(defaultUsername).catch(error => {
-        console.log('Pre-fetch JWT failed for default user:', error.message);
-      });
+    if (!prefetchDefaultToken || !defaultUsername) {
+      return;
     }
-  }, [defaultUsername, getToken]);
+
+    getToken(defaultUsername).catch(error => {
+      console.log('Pre-fetch JWT failed for default user:', error.message);
+    });
+  }, [prefetchDefaultToken, defaultUsername, getToken]);
 
   const value: JWTContextType = {
     getToken,

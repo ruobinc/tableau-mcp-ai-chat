@@ -114,7 +114,7 @@ class MCPClient:
         )
 
         process_query = True
-        max_iterations = 10  # 無限ループを防ぐ
+        max_iterations = 20  # 無限ループを防ぐ
         iteration = 0
         
         while process_query and iteration < max_iterations:

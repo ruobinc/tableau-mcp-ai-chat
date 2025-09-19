@@ -46,7 +46,7 @@ export default function HomePage() {
           filter: 'brightness(0.3) blur(1px)'
         }}
       >
-        <source src="/home-video.mp4" type="video/mp4" />
+        <source src="/row.mp4" type="video/mp4" />
       </Box>
 
       {/* Overlay for better readability */}

@@ -22,6 +22,7 @@ export default function TableauPulseEmbedSimple({
   layout = 'default'
 }: TableauPulseEmbedProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isApiReady, setIsApiReady] = useState(false);
   const { jwtToken, loading, error } = useJWTToken(username);
 
   // クライアントサイドでのマウント状態を管理
@@ -29,9 +30,66 @@ export default function TableauPulseEmbedSimple({
     setIsMounted(true);
   }, []);
 
+  // Tableau Pulse Web Componentの読み込み完了を待機
+  useEffect(() => {
+    if (!isMounted) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const markReady = () => {
+      if (!cancelled) {
+        setIsApiReady(true);
+      }
+    };
+
+    if (typeof window !== 'undefined' && 'customElements' in window) {
+      const registry = window.customElements;
+      if (registry.get('tableau-pulse')) {
+        markReady();
+      } else {
+        registry
+          .whenDefined('tableau-pulse')
+          .then(markReady)
+          .catch(() => {
+            if (!cancelled) {
+              setIsApiReady(false);
+            }
+          });
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isMounted]);
+
   // サーバーサイドレンダリング時またはマウント前は何も表示しない
   if (!isMounted) {
     return null;
+  }
+
+  if (!isApiReady) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        p: 4
+      }}>
+        <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />
+        <Typography variant="body1" sx={{
+          color: '#64748b',
+          fontWeight: 500,
+          textAlign: 'center'
+        }}>
+          Tableau Pulseを初期化しています...
+        </Typography>
+      </Box>
+    );
   }
 
   // メトリクスIDが設定されていない場合の処理

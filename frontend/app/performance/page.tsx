@@ -5,8 +5,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
 import Paper from '@mui/material/Paper';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -18,8 +16,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { CircularProgress, Tooltip } from '@mui/material';
 import PreviewIcon from '@mui/icons-material/Preview';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
@@ -30,6 +26,18 @@ import { tableauUserName } from '../../constants/constants';
 const TableauDashboard = dynamic(() => import('../../components/TableauDashboard'), {
   ssr: false,
   loading: () => null
+});
+
+const MarkdownRenderer = dynamic(() => import('../../components/MarkdownRenderer'), {
+  ssr: false,
+  loading: () => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <CircularProgress size={16} sx={{ color: '#10b981' }} />
+      <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+        読み込み中...
+      </Typography>
+    </Box>
+  )
 });
 
 interface ChatMessage {
@@ -43,7 +51,6 @@ interface ChatMessage {
 }
 
 export default function PerformancePage() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [message, setMessage] = React.useState('');
   const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
@@ -52,19 +59,9 @@ export default function PerformancePage() {
   const [reactCode, setReactCode] = React.useState('');
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
-  const isMenuOpen = Boolean(anchorEl);
-
   React.useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleChatToggle = () => {
     setIsChatOpen(!isChatOpen);
@@ -258,27 +255,6 @@ export default function PerformancePage() {
     }
   };
 
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
-  );
 
   return (
     <Box sx={{
@@ -341,7 +317,7 @@ export default function PerformancePage() {
         {/* Right Panel - Chat Area */}
         <Slide direction="left" in={isChatOpen} mountOnEnter unmountOnExit>
           <Box sx={{
-            width: { xs: '100%', md: 500, lg: 600 },
+            width: { xs: '100%', md: 600, lg: 750 },
             display: 'flex',
             flexDirection: 'column',
             backgroundColor: '#ffffff',
@@ -652,7 +628,7 @@ export default function PerformancePage() {
                             backgroundColor: '#f3f4f6'
                           }
                         }}>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                          <MarkdownRenderer>{msg.text}</MarkdownRenderer>
                         </Box>
                       ) : (
                         <Typography variant="body2" sx={{
@@ -734,14 +710,14 @@ export default function PerformancePage() {
 
                     {/* Inline Chart Display */}
                     {msg.sender === 'bot' && msg.showChart && msg.chartCode && (
-                      <Box sx={{
-                        mt: 2,
-                        ml: 1,
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 2,
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                      }}>
+                    <Box sx={{
+                      mt: 2,
+                      ml: 1,
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 2,
+                      backgroundColor: '#ffffff',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    }}>
                         <Box sx={{
                           p: 2,
                           borderBottom: '1px solid #e2e8f0',
@@ -760,7 +736,7 @@ export default function PerformancePage() {
                           </Typography>
                         </Box>
                         <Box sx={{
-                          height: 400,
+                          height: { xs: 460, md: 530 },
                           overflow: 'hidden'
                         }}>
                           <iframe
