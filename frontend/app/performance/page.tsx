@@ -405,7 +405,7 @@ export default function PerformancePage() {
                       fontWeight: 600,
                       fontSize: '1.1rem'
                     }}>
-                      ダッシュボードプレビュー
+                      分析レポート
                     </Typography>
                   </Box>
                   <IconButton

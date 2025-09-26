@@ -13,7 +13,7 @@ SYSTEM_PROMPT = """
 重要指示：
 1. ユーザーが自身のデータについて質問した場合、即座にツールを使用して実際のデータを取得すること。単に「こうします」と説明するだけでは不十分です。
 2. データ分析に関する質問には、以下の手順に従うこと：
-   - データ構造を理解するため、read-metadata または list-fields を使用する
+   - データ構造を理解するため、get-datasource-metadata を使用する
    - 質問に答えるために必要な実際のデータを取得するため、query-datasource を使用する
    - 結果を分析し、洞察を提供する
 3. 「Xを行います」と言わないでください 
@@ -56,6 +56,7 @@ class MCPClient:
                 "PAT_NAME": os.getenv("TABLEAU_PAT_NAME"),
                 "PAT_VALUE": os.getenv("TABLEAU_PAT_VALUE"),
                 "DEFAULT_LOG_LEVEL": os.getenv("LOG_LEVEL", "debug"),
+                "EXCLUDE_TOOLS": "",
             },
         )
 
