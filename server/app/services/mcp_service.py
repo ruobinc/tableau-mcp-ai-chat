@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any, List
 from contextlib import AsyncExitStack
+import time
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -8,6 +9,7 @@ from ..config.settings import Settings
 from ..config.prompts import MCP_SYSTEM_PROMPT, SIMPLE_CHAT_FALLBACK_PROMPT, TABLEAU_ANALYSIS_FALLBACK_PROMPT
 from ..core.exceptions import MCPConnectionError, BedrockError
 from ..core.response_utils import extract_text_from_response, format_tool_execution_log, create_error_message
+from ..core.logging import get_mcp_logger
 
 
 class MCPService:
@@ -17,16 +19,24 @@ class MCPService:
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self._is_connected = False
+        self.logger = get_mcp_logger()
 
     async def connect(self) -> bool:
         """MCPサーバーに接続を試行"""
+        start_time = time.time()
         try:
+            self.logger.info("MCP server connection attempt started")
             await self._connect_to_server()
             self._is_connected = True
+            duration = time.time() - start_time
+            self.logger.info("MCP server connected successfully", extra={"duration": duration})
             return True
         except Exception as e:
-            print(f"Warning: Could not connect to MCP server: {e}")
-            print("Will use simple mode without Tableau integration")
+            duration = time.time() - start_time
+            self.logger.warning(
+                "Could not connect to MCP server, using fallback mode",
+                extra={"error": str(e), "duration": duration}
+            )
             self._is_connected = False
             return False
 
@@ -63,7 +73,11 @@ class MCPService:
 
             response = await self.session.list_tools()
             tools = response.tools
-            print(f"Connected to MCP server with {len(tools)} tools:", [tool.name for tool in tools])
+            tool_names = [tool.name for tool in tools]
+            self.logger.info(
+                f"Connected to MCP server with {len(tools)} tools",
+                extra={"tool_count": len(tools), "tools": tool_names}
+            )
             return tools
         except Exception as e:
             raise MCPConnectionError(f"Failed to connect to MCP server: {str(e)}")
@@ -104,19 +118,53 @@ class MCPService:
         if not self.session:
             raise MCPConnectionError("MCP session not initialized. Call connect_to_server() first.")
 
+        start_time = time.time()
         try:
+            self.logger.debug(f"Executing tool: {tool_name}", extra={"tool": tool_name, "args": tool_args})
             result = await self.session.call_tool(tool_name, tool_args)
+            duration = time.time() - start_time
+            self.logger.info(
+                f"Tool executed successfully: {tool_name}",
+                extra={"tool": tool_name, "duration": duration}
+            )
             return result
         except Exception as e:
+            duration = time.time() - start_time
+            self.logger.error(
+                f"Tool execution failed: {tool_name}",
+                extra={"tool": tool_name, "error": str(e), "duration": duration}
+            )
             raise MCPConnectionError(f"Tool execution failed for {tool_name}: {str(e)}")
 
     async def process_chat_with_history(self, messages: List[Dict[str, Any]]) -> str:
         """チャット履歴を含むクエリ処理"""
-        if self._is_connected:
-            return await self._process_query_with_tools(messages)
-        else:
-            # MCP未接続時のフォールバック
-            return await self._simple_chat_fallback(messages)
+        start_time = time.time()
+        message_count = len(messages)
+        self.logger.info(
+            f"Processing chat with {message_count} messages",
+            extra={"message_count": message_count, "has_mcp": self._is_connected}
+        )
+
+        try:
+            if self._is_connected:
+                result = await self._process_query_with_tools(messages)
+            else:
+                # MCP未接続時のフォールバック
+                result = await self._simple_chat_fallback(messages)
+
+            duration = time.time() - start_time
+            self.logger.info(
+                "Chat processing completed",
+                extra={"duration": duration, "response_length": len(result)}
+            )
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            self.logger.error(
+                "Chat processing failed",
+                extra={"error": str(e), "duration": duration}
+            )
+            raise
 
     async def _process_query_with_tools(self, messages: List[Dict[str, Any]]) -> str:
         """Process a query using Claude and available tools with conversation history"""
@@ -129,7 +177,7 @@ class MCPService:
             else:
                 available_tools = []
 
-            print(f"Available tools: {available_tools}")
+            self.logger.debug(f"Available tools: {[tool['name'] for tool in available_tools]}", extra={"tool_count": len(available_tools)})
 
             system_prompt = (
                 MCP_SYSTEM_PROMPT if available_tools
@@ -201,7 +249,7 @@ class MCPService:
                     # ツール使用なし、完了
                     process_query = False
 
-            print("\n".join(final_text))
+            self.logger.debug("Query processing result", extra={"response_length": len("\n".join(final_text))})
             return "\n".join(final_text)
 
         except Exception as e:
@@ -217,7 +265,7 @@ class MCPService:
 
             return extract_text_from_response(response.content)
         except Exception as e:
-            print(f"Error in simple chat fallback: {e}")
+            self.logger.error("Simple chat fallback failed", extra={"error": str(e)})
             return create_error_message("チャット処理")
 
     async def cleanup(self):

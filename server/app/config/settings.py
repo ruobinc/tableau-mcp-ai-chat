@@ -30,6 +30,12 @@ class TableauSettings(BaseModel):
     pat_value: str | None = None
 
 
+class LoggingSettings(BaseModel):
+    level: str = "INFO"
+    use_structured: bool = False
+    enable_performance_logs: bool = True
+
+
 class MCPSettings(BaseModel):
     server_script_path: str | None = None
     log_level: str = "debug"
@@ -55,6 +61,7 @@ class Settings(BaseModel):
     bedrock: BedrockSettings
     tableau: TableauSettings
     mcp: MCPSettings
+    logging: LoggingSettings
     cors: CORSSettings
 
     def __init__(self, **kwargs):
@@ -83,6 +90,11 @@ class Settings(BaseModel):
             mcp=MCPSettings(
                 server_script_path=os.getenv("SERVER_SCRIPT_PATH"),
                 log_level=os.getenv("LOG_LEVEL", "debug")
+            ),
+            logging=LoggingSettings(
+                level=os.getenv("LOG_LEVEL", "INFO").upper(),
+                use_structured=os.getenv("LOG_STRUCTURED", "false").lower() == "true",
+                enable_performance_logs=os.getenv("LOG_PERFORMANCE", "true").lower() == "true"
             ),
             cors=CORSSettings(),
             **kwargs
