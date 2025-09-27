@@ -19,6 +19,7 @@ import Template from './samples/template';
 import UserEvents from './samples/user-events';
 import VizParameters from './samples/viz-parameters';
 import VizParametersInline from './samples/viz-parameters-inline';
+import TableauDashboardSample from './samples/tableau-dashboard';
 
 const routes = [
   {
@@ -110,6 +111,11 @@ const routes = [
     title: 'Pulse methods',
     path: '/pulse-methods',
     element: <PulseMethods />,
+  },
+  {
+    title: 'Tableau Dashboard (JWT Auth)',
+    path: '/tableau-dashboard',
+    element: <TableauDashboardSample />,
   },
 ];
 
