@@ -9,6 +9,7 @@ from ..core.response_utils import create_error_message
 from ..core.logging import get_api_logger
 
 router = APIRouter(prefix="/api", tags=["dashboard"])
+logger = get_api_logger()
 
 
 @router.post("/create_report", response_model=CreateReportResponse)

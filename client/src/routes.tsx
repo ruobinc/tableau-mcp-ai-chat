@@ -21,8 +21,26 @@ import VizParameters from './samples/viz-parameters';
 import VizParametersInline from './samples/viz-parameters-inline';
 import TableauDashboardSample from './samples/tableau-dashboard';
 import TableauPulseEmbed from './features/tableau/TableauPulseEmbed';
+import HomePage from './pages/HomePage';
+import PerformancePage from './pages/PerformancePage';
+import PulsePage from './pages/PulsePage';
 
 const routes = [
+  {
+    title: 'Home Page',
+    path: '/home',
+    element: <HomePage />,
+  },
+  {
+    title: 'Performance Dashboard',
+    path: '/performance',
+    element: <PerformancePage />,
+  },
+  {
+    title: 'Pulse Metrics Page',
+    path: '/pulse',
+    element: <PulsePage />,
+  },
   {
     title: 'Basic embedding',
     path: '/basic-embedding',
