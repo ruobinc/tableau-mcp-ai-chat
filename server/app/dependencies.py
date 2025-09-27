@@ -29,6 +29,7 @@ def get_dashboard_service() -> DashboardService:
 
 @lru_cache()
 def get_mcp_service() -> MCPService:
-    """MCPServicen"""
+    """MCPServiceのインスタンスを取得"""
+    settings = get_settings()
     bedrock_service = get_bedrock_service()
-    return MCPService(bedrock_service)
+    return MCPService(settings, bedrock_service)
