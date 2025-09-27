@@ -1,73 +1,129 @@
-# React + TypeScript + Vite
+# Tableau MCP AI Chat - Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Viteベースのフロントエンドアプリケーションです。TableauダッシュボードとAIチャット機能を統合した分析プラットフォームを提供します。
 
-Currently, two official plugins are available:
+## 技術スタック
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 18** - UIライブラリ
+- **TypeScript** - 型安全性
+- **Vite** - 高速ビルドツール
+- **Material-UI (MUI)** - UIコンポーネントライブラリ
+- **Tableau Embedding API** - Tableau統合
+- **React Router** - クライアントサイドルーティング
 
-## React Compiler
+## 主要機能
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### ページ構成
 
-## Expanding the ESLint configuration
+- **ホームページ** (`/home`) - メイン分析インターフェース
+- **パフォーマンスページ** (`/performance`) - 分析レポート表示
+- **Pulseページ** (`/pulse`) - Tableau Pulse埋め込み
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### コア機能
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **分割ペインレイアウト** - Tableauダッシュボード + AIチャット
+- **レスポンシブデザイン** - モバイル対応
+- **リアルタイムチャット** - AI分析アシスタント
+- **ダッシュボード埋め込み** - Tableau Connected App認証
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 開発コマンド
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 環境構築
+
+```bash
+# 依存関係をインストール
+npm install
+
+# 開発サーバー起動 (localhost:5173)
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### ビルド・デプロイ
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# TypeScriptコンパイル + プロダクションビルド
+npm run build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# ビルド結果をプレビュー
+npm run preview
+
+# ESLintによるコード品質チェック
+npm run lint
 ```
+
+## ディレクトリ構成
+
+```
+src/
+├── config/                 # 設定ファイル
+│   ├── api.ts              # API設定
+│   └── tableau.ts          # Tableau設定
+├── features/               # 機能別コンポーネント
+│   ├── chat/               # AIチャット機能
+│   └── tableau/            # Tableau統合
+│       ├── components/     # 埋め込みコンポーネント
+│       └── hooks/          # カスタムフック
+├── pages/                  # ページコンポーネント
+│   ├── home/               # ホームページ
+│   ├── performance/        # パフォーマンス分析
+│   └── pulse/              # Pulse表示
+├── providers/              # コンテキストプロバイダー
+└── App.tsx                 # メインアプリケーション
+```
+
+## API統合
+
+### バックエンド接続
+
+```typescript
+// API設定 (src/config/api.ts)
+export const API_BASE_URL = 'http://localhost:8000';
+
+// 主要エンドポイント
+POST /api/chat           // AIチャット
+POST /api/create_report  // レポート生成
+POST /api/create_chart   // チャート生成
+POST /api/generate_jwt   // Tableau認証
+```
+
+### Tableau統合
+
+- **Connected App認証** - JWT トークンベース
+- **埋め込みダッシュボード** - Tableau Embedding API v3
+- **Pulse表示** - シンプル埋め込みモード
+
+## 開発設定
+
+### TypeScript設定
+
+- `tsconfig.json` - アプリケーション設定
+- `tsconfig.node.json` - Vite設定
+- パス解決: `@/` → `src/`
+
+### ESLint設定
+
+- React/TypeScript対応
+- Prettier統合
+- Import ソート
+- React Hooks ルール
+
+### Vite設定
+
+- React SWC プラグイン
+- Hot Module Replacement (HMR)
+- TypeScript サポート
+
+## 重要な特徴
+
+- **レスポンシブ設計**: モバイルファーストアプローチ
+- **型安全性**: 全てのコンポーネントでTypeScript活用
+- **再利用可能性**: 機能別にコンポーネント分離
+- **パフォーマンス最適化**: Viteによる高速開発・ビルド
+- **マテリアルデザイン**: MUIコンポーネントで統一されたUX
+
+## ブラウザサポート
+
+- Chrome/Edge (最新版)
+- Firefox (最新版)
+- Safari (最新版)
+- モバイルブラウザ対応
