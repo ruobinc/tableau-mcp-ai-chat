@@ -96,8 +96,8 @@ const PerformancePage = () => {
             setInput={chatHook.setInput}
             onSend={chatHook.sendMessage}
             isLoading={chatHook.isLoading}
-            onRequestPreview={(message) => chatHook.createReport(message.id)}
-            onRequestChart={(message) => chatHook.createChart(message.id)}
+            onRequestPreview={chatHook.requestPreview}
+            onRequestChart={chatHook.requestChart}
             preview={chatHook.preview}
             onClosePreview={chatHook.closePreview}
           />

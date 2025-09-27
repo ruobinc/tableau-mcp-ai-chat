@@ -116,9 +116,27 @@ export const useChat = () => {
     }
   }, [state.isLoading, addMessage]);
 
-  const createReport = useCallback(async (messageId: number) => {
-    const message = state.messages.find(m => m.id === messageId);
-    if (!message?.text) return;
+  const updateMessage = useCallback((messageId: number, updates: Partial<ChatMessage>) => {
+    setState(prev => ({
+      ...prev,
+      messages: prev.messages.map(msg =>
+        msg.id === messageId ? { ...msg, ...updates } : msg
+      )
+    }));
+  }, []);
+
+  const requestPreview = useCallback(async (message: ChatMessage) => {
+    if (message.dashboardCode) {
+      // 既にダッシュボードコードがある場合は再利用
+      setState(prev => ({
+        ...prev,
+        preview: {
+          isOpen: true,
+          code: message.dashboardCode || null
+        }
+      }));
+      return;
+    }
 
     setState(prev => ({ ...prev, isLoading: true }));
 
@@ -130,6 +148,9 @@ export const useChat = () => {
           timestamp: new Date().toISOString()
         }
       });
+
+      // メッセージにダッシュボードコードを保存
+      updateMessage(message.id, { dashboardCode: response.code });
 
       setState(prev => ({
         ...prev,
@@ -143,11 +164,14 @@ export const useChat = () => {
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [state.messages]);
+  }, [updateMessage]);
 
-  const createChart = useCallback(async (messageId: number) => {
-    const message = state.messages.find(m => m.id === messageId);
-    if (!message?.text) return;
+  const requestChart = useCallback(async (message: ChatMessage) => {
+    if (message.chartCode) {
+      // 既にチャートコードがある場合は表示状態をトグル
+      updateMessage(message.id, { showChart: !message.showChart });
+      return;
+    }
 
     setState(prev => ({ ...prev, isLoading: true }));
 
@@ -160,19 +184,17 @@ export const useChat = () => {
         }
       });
 
-      setState(prev => ({
-        ...prev,
-        preview: {
-          isOpen: true,
-          code: response.code
-        }
-      }));
+      // メッセージにチャートコードを保存し、表示状態をONに
+      updateMessage(message.id, {
+        chartCode: response.code,
+        showChart: true
+      });
     } catch (error) {
       console.error('Chart creation error:', error);
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [state.messages]);
+  }, [updateMessage]);
 
   const setInput = useCallback((value: string) => {
     setState(prev => ({ ...prev, input: value }));
@@ -199,8 +221,9 @@ export const useChat = () => {
   return {
     ...state,
     sendMessage,
-    createReport,
-    createChart,
+    requestPreview,
+    requestChart,
+    updateMessage,
     setInput,
     toggleChat,
     closePreview,
