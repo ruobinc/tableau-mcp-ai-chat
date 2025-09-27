@@ -20,6 +20,7 @@ import UserEvents from './samples/user-events';
 import VizParameters from './samples/viz-parameters';
 import VizParametersInline from './samples/viz-parameters-inline';
 import TableauDashboardSample from './samples/tableau-dashboard';
+import TableauPulseEmbed from './features/tableau/TableauPulseEmbed';
 
 const routes = [
   {
@@ -116,6 +117,11 @@ const routes = [
     title: 'Tableau Dashboard (JWT Auth)',
     path: '/tableau-dashboard',
     element: <TableauDashboardSample />,
+  },
+  {
+    title: 'Tableau Pulse Metrics',
+    path: '/tableau-pulse',
+    element: <TableauPulseEmbed mode="multiple" />,
   },
 ];
 
