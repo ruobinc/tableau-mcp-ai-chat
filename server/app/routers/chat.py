@@ -3,6 +3,7 @@ from ..models.requests import ChatRequest
 from ..models.responses import ChatResponse
 from ..services.mcp_service import MCPService
 from ..dependencies import get_mcp_service
+from ..core.response_utils import create_error_message
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
@@ -32,7 +33,7 @@ async def chat(
     except Exception as e:
         print(f"Error processing chat request: {e}")
         return ChatResponse(
-            message="申し訳ありません。現在システムでエラーが発生しています。しばらく後にもう一度お試しください。",
+            message=create_error_message("チャット処理"),
             timestamp=request.timestamp,
             success=False
         )

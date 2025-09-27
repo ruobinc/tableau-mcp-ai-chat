@@ -5,7 +5,9 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from .bedrock_service import BedrockService
 from ..config.settings import Settings
+from ..config.prompts import MCP_SYSTEM_PROMPT, SIMPLE_CHAT_FALLBACK_PROMPT, TABLEAU_ANALYSIS_FALLBACK_PROMPT
 from ..core.exceptions import MCPConnectionError, BedrockError
+from ..core.response_utils import extract_text_from_response, format_tool_execution_log, create_error_message
 
 
 class MCPService:
@@ -130,8 +132,8 @@ class MCPService:
             print(f"Available tools: {available_tools}")
 
             system_prompt = (
-                self.settings.mcp.system_prompt if available_tools
-                else "あなたはTableauデータ分析のアシスタントです。簡潔で実用的な回答を提供してください。"
+                MCP_SYSTEM_PROMPT if available_tools
+                else TABLEAU_ANALYSIS_FALLBACK_PROMPT
             )
 
             response = self.bedrock_service.create_message(
@@ -156,7 +158,7 @@ class MCPService:
 
                     elif content.type == "tool_use":
                         tool_name = content.name
-                        final_text.append(f"[ツール実行: {tool_name}]")
+                        final_text.append(format_tool_execution_log(tool_name))
 
                 # ツール使用ブロックを確認
                 tool_use_blocks = [c for c in response.content if c.type == "tool_use"]
@@ -210,18 +212,13 @@ class MCPService:
         try:
             response = self.bedrock_service.create_message(
                 messages=messages,
-                system="あなたは親切なAIアシスタントです。ユーザーの質問に日本語で答えてください。"
+                system=SIMPLE_CHAT_FALLBACK_PROMPT
             )
 
-            final_text = []
-            for content_item in response.content:
-                if content_item.type == "text":
-                    final_text.append(content_item.text)
-
-            return "\n".join(final_text)
+            return extract_text_from_response(response.content)
         except Exception as e:
             print(f"Error in simple chat fallback: {e}")
-            return "申し訳ありません。現在システムでエラーが発生しています。しばらく後にもう一度お試しください。"
+            return create_error_message("チャット処理")
 
     async def cleanup(self):
         """リソースクリーンアップ"""

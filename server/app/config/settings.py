@@ -34,19 +34,6 @@ class MCPSettings(BaseModel):
     server_script_path: str | None = None
     log_level: str = "debug"
     max_iterations: int = 20
-    system_prompt: str = """
-重要指示：
-1. ユーザーが自身のデータについて質問した場合、即座にツールを使用して実際のデータを取得すること。単に「こうします」と説明するだけでは不十分です。
-2. データ分析に関する質問には、以下の手順に従うこと：
-   - データ構造を理解するため、get-datasource-metadata を使用する
-   - 質問に答えるために必要な実際のデータを取得するため、query-datasource を使用する
-   - 結果を分析し、洞察を提供する
-3. 「Xを行います」と言わないでください
-    - 利用可能なツールを使用して、直ちに X を実行してください。
-4. 取得した実際のデータに基づいて、明確で実行可能な洞察を提供してください。
-5. 出力結果はエクゼクティブサマリレポートとしてまとめる
-6. もしユーザーから'このビュー'や'このダッシュボード'と質問する際に、'get-view-data'を使い、view IDが'8073b84f-e050-4be1-9cb6-96fcffd53649'のデータを使って分析してください
-"""
 
 
 class CORSSettings(BaseModel):

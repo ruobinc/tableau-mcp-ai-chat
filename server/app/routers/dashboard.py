@@ -3,6 +3,7 @@ from ..models.requests import CreateReportRequest
 from ..models.responses import CreateReportResponse
 from ..services.dashboard_service import DashboardService
 from ..dependencies import get_dashboard_service
+from ..core.response_utils import create_error_message
 
 router = APIRouter(prefix="/api", tags=["dashboard"])
 
@@ -25,7 +26,7 @@ async def create_report(
     except Exception as e:
         print(f"Error creating report: {e}")
         return CreateReportResponse(
-            code="// エラーが発生しました",
+            code=f"// {create_error_message('レポート作成')}",
             timestamp=request.timestamp,
             success=False
         )
@@ -49,7 +50,7 @@ async def create_chart(
     except Exception as e:
         print(f"Error creating chart: {e}")
         return CreateReportResponse(
-            code="// エラーが発生しました",
+            code=f"// {create_error_message('チャート作成')}",
             timestamp=request.timestamp,
             success=False
         )
