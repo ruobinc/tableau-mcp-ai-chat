@@ -3,6 +3,7 @@ import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { tableauEmbeddedUrl, tableauUserName } from '@/config/tableau';
 import { useJWTToken } from '@/features/tableau/hooks/useJWTToken';
+import { TableauViz } from '@/features/tableau/components/TableauEmbedding';
 
 interface TableauDashboardProps {
   username?: string;
@@ -96,8 +97,6 @@ const TableauDashboard: React.FC<TableauDashboardProps> = ({ username }) => {
     );
   }
 
-  const vizUrl = `${tableauEmbeddedUrl}?:embed=yes&:toolbar=no&:tabs=no&:token=${jwtToken}`;
-
   return (
     <Box
       sx={{
@@ -107,12 +106,16 @@ const TableauDashboard: React.FC<TableauDashboardProps> = ({ username }) => {
       }}
     >
       {jwtToken ? (
-        <iframe
-          src={vizUrl}
+        <TableauViz
+          src={tableauEmbeddedUrl}
+          token={jwtToken}
+          toolbar="hidden"
+          hideTabs
+          iframeAuth
+          forceTokenSync
           width="100%"
           height="100%"
-          style={{ border: 'none', borderRadius: 8 }}
-          title="Tableau Dashboard"
+          iframeStyle="border: none; border-radius: 8px;"
         />
       ) : (
         <Box

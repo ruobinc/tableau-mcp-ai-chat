@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useJWTToken } from '@/features/tableau/hooks/useJWTToken';
+import { TableauPulse } from '@/features/tableau/components/TableauEmbedding';
 
 interface TableauPulseEmbedProps {
   username?: string;
@@ -21,69 +22,14 @@ const TableauPulseEmbedSimple: React.FC<TableauPulseEmbedProps> = ({
   layout = 'default'
 }) => {
   const [isMounted, setIsMounted] = useState(false);
-  const [isApiReady, setIsApiReady] = useState(false);
   const { jwtToken, loading, error } = useJWTToken(username);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!isMounted) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const markReady = () => {
-      if (!cancelled) {
-        setIsApiReady(true);
-      }
-    };
-
-    if (typeof window !== 'undefined' && 'customElements' in window) {
-      const registry = window.customElements;
-      if (registry.get('tableau-pulse')) {
-        markReady();
-      } else {
-        registry
-          .whenDefined('tableau-pulse')
-          .then(markReady)
-          .catch(() => {
-            if (!cancelled) {
-              setIsApiReady(false);
-            }
-          });
-      }
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isMounted]);
-
   if (!isMounted) {
     return null;
-  }
-
-  if (!isApiReady) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          p: 4
-        }}
-      >
-        <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />
-        <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 500, textAlign: 'center' }}>
-          Tableau Pulseを初期化しています...
-        </Typography>
-      </Box>
-    );
   }
 
   if (!metricId) {
@@ -155,24 +101,44 @@ const TableauPulseEmbedSimple: React.FC<TableauPulseEmbedProps> = ({
     ? `https://prod-apnortheast-a.online.tableau.com/pulse/site/${siteName}/metrics/${metricId}`
     : `https://prod-apnortheast-a.online.tableau.com/pulse/metrics/${metricId}`;
 
+  const normalizedWidth = typeof width === 'number' ? `${width}px` : width;
+  const normalizedHeight = typeof height === 'number' ? `${height}px` : height;
+
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         width: '100%',
         height: '100%'
       }}
-      dangerouslySetInnerHTML={{
-        __html: `
-          <tableau-pulse
-            src="${pulseUrl}"
-            token="${jwtToken}"
-            width="${typeof width === 'string' ? width : `${width}px`}"
-            height="${typeof height === 'string' ? height : `${height}px`}"
-            layout="${layout}">
-          </tableau-pulse>
-        `
-      }}
-    />
+    >
+      {jwtToken ? (
+        <TableauPulse
+          src={pulseUrl}
+          token={jwtToken}
+          width={normalizedWidth}
+          height={normalizedHeight}
+          layout={layout}
+          iframeAuth
+          iframeStyle="border: none; border-radius: 8px;"
+        />
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            p: 4
+          }}
+        >
+          <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />
+          <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 500, textAlign: 'center' }}>
+            認証中...
+          </Typography>
+        </Box>
+      )}
+    </Box>
   );
 };
 
