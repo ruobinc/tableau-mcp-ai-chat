@@ -8,3 +8,4 @@ node_modules/
 CLAUDE.md
 work/
 .mcp.json
+.codex/

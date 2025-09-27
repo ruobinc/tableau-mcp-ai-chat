@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
 export interface UseInViewOptions extends IntersectionObserverInit {
   once?: boolean;
@@ -6,7 +6,7 @@ export interface UseInViewOptions extends IntersectionObserverInit {
 
 export const useInView = <T extends Element>(
   options: UseInViewOptions = {}
-): { ref: RefObject<T | null>; isInView: boolean } => {
+): { ref: MutableRefObject<T | null>; isInView: boolean } => {
   const { once = true, ...observerOptions } = options;
   const elementRef = useRef<T | null>(null);
   const [isInView, setIsInView] = useState(false);
