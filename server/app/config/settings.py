@@ -1,0 +1,71 @@
+import os
+from functools import lru_cache
+from pydantic import BaseModel
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class AWSSettings(BaseModel):
+    region: str = "ap-northeast-1"
+    access_key: str | None = None
+    secret_key: str | None = None
+    session_token: str | None = None
+
+
+class BedrockSettings(BaseModel):
+    model_id: str = "apac.anthropic.claude-sonnet-4-20250514-v1:0"
+    max_tokens: int = 10000
+
+
+class TableauSettings(BaseModel):
+    connected_app_client_id: str | None = None
+    connected_app_client_secret: str | None = None
+    connected_app_secret_value: str | None = None
+
+
+class CORSSettings(BaseModel):
+    allowed_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3002",
+        "http://localhost:5173"
+    ]
+    allow_credentials: bool = True
+    allow_methods: list[str] = ["*"]
+    allow_headers: list[str] = ["*"]
+
+
+class Settings(BaseModel):
+    app_title: str = "Tableau AI Chat API"
+    app_version: str = "1.0.0"
+
+    aws: AWSSettings
+    bedrock: BedrockSettings
+    tableau: TableauSettings
+    cors: CORSSettings
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            aws=AWSSettings(
+                region=os.getenv("AWS_REGION", "ap-northeast-1"),
+                access_key=os.getenv("AWS_ACCESS_KEY"),
+                secret_key=os.getenv("AWS_SECRET_KEY"),
+                session_token=os.getenv("AWS_SESSION_TOKEN")
+            ),
+            bedrock=BedrockSettings(
+                model_id=os.getenv("BEDROCK_MODEL_ID", "apac.anthropic.claude-sonnet-4-20250514-v1:0"),
+                max_tokens=int(os.getenv("MAX_TOKENS", "10000"))
+            ),
+            tableau=TableauSettings(
+                connected_app_client_id=os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID"),
+                connected_app_client_secret=os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET"),
+                connected_app_secret_value=os.getenv("TABLEAU_CONNECTED_APP_SECRET_VALUE")
+            ),
+            cors=CORSSettings(),
+            **kwargs
+        )
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()

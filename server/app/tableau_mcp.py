@@ -5,7 +5,7 @@ from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from dotenv import load_dotenv
-from .bedrock import BedrockClient
+from .services.bedrock_service import BedrockService
 
 load_dotenv()
 
@@ -28,7 +28,9 @@ class MCPClient:
     def __init__(self):
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
-        self.bedrock_client = BedrockClient()
+        from .config.settings import get_settings
+        settings = get_settings()
+        self.bedrock_client = BedrockService(settings)
         self.server_script_path = os.getenv(
             "SERVER_SCRIPT_PATH", 
         )

@@ -1,14 +1,13 @@
-from typing import Dict, Any
-from .bedrock import BedrockClient
+from .bedrock_service import BedrockService
 
 
-class DashboardGenerator:
-    def __init__(self):
-        self.bedrock_client = BedrockClient()
-        
+class DashboardService:
+    def __init__(self, bedrock_service: BedrockService):
+        self.bedrock_service = bedrock_service
+
     async def generate_dashboard_code(self, content: str) -> str:
         """Generate React dashboard code using Recharts"""
-        
+
         # HTMLダッシュボード用のシステムメッセージ
         dashboard_system_prompt = """
 あなたはデータ分析結果をHTML+CSS+JavaScriptを使ってダッシュボード化する専門家です。Claudeのアーティファクトのような高品質なダッシュボードを作成してください。
@@ -80,28 +79,28 @@ class DashboardGenerator:
 </body>
 </html>
 """
-        
+
         # 単一メッセージとしてLLMに送信
         messages = [
             {"role": "user", "content": f"以下の分析結果をHTML+CSS+Chart.jsを使ってダッシュボードとして可視化してください:\n\n{content}"}
         ]
-        
-        response = self.bedrock_client.create_message(
+
+        response = self.bedrock_service.create_message(
             messages=messages,
             system=dashboard_system_prompt
         )
-        
+
         # レスポンスからテキストを抽出
         final_text = []
         for content_item in response.content:
             if content_item.type == "text":
                 final_text.append(content_item.text)
-        
+
         return "\n".join(final_text)
-    
+
     async def generate_chart_code(self, content: str) -> str:
         """Generate Chart HTML code using Chart.js"""
-        
+
         # チャート専用のシステムメッセージ
         chart_system_prompt = """
 あなたはデータ分析結果を単一のチャートを使ってHTML+CSS+JavaScriptで可視化する専門家です。
@@ -152,21 +151,21 @@ class DashboardGenerator:
 </body>
 </html>
 """
-        
+
         # 単一メッセージとしてLLMに送信
         messages = [
             {"role": "user", "content": f"以下の分析結果から最適なチャートを1つ作成してください:\n\n{content}"}
         ]
-        
-        response = self.bedrock_client.create_message(
+
+        response = self.bedrock_service.create_message(
             messages=messages,
             system=chart_system_prompt
         )
-        
+
         # レスポンスからテキストを抽出
         final_text = []
         for content_item in response.content:
             if content_item.type == "text":
                 final_text.append(content_item.text)
-        
+
         return "\n".join(final_text)

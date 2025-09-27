@@ -1,187 +1,75 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Dict, Any
-import uvicorn
 from contextlib import asynccontextmanager
+import uvicorn
 
-from .tableau_mcp import MCPClient
-from .dashboard import DashboardGenerator
-from .auth import generate_jwt_token
-import os
+from .config.settings import get_settings
+from .dependencies import get_mcp_service
+from .core.exceptions import (
+    CustomException,
+    custom_exception_handler,
+    general_exception_handler
+)
+from .routers import chat, dashboard, auth
 
-# Global clients
-mcp_client: MCPClient = None
-dashboard_generator: DashboardGenerator = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    global mcp_client, dashboard_generator
-    
-    mcp_client = MCPClient()
-    dashboard_generator = DashboardGenerator()
-    
+    mcp_service = get_mcp_service()
+
     # Try to connect to MCP server (optional - may fail if server not available)
     try:
-        await mcp_client.connect_to_server()
-        print("MCP server connected successfully")
+        success = await mcp_service.connect()
+        if success:
+            print("MCP server connected successfully")
+        else:
+            print("Will use simple mode without Tableau integration")
     except Exception as e:
         print(f"Warning: Could not connect to MCP server: {e}")
         print("Will use simple mode without Tableau integration")
-    
+
     yield
-    
+
     # Shutdown
-    if mcp_client:
-        await mcp_client.cleanup()
+    await mcp_service.cleanup()
 
-app = FastAPI(
-    title="Tableau AI Chat API", 
-    version="1.0.0",
-    lifespan=lifespan
-)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3002",
-        "http://localhost:5173"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+def create_app() -> FastAPI:
+    settings = get_settings()
 
-class ChatMessage(BaseModel):
-    role: str  # 'user' or 'assistant'
-    content: str
+    app = FastAPI(
+        title=settings.app_title,
+        version=settings.app_version,
+        lifespan=lifespan
+    )
 
-class ChatRequest(BaseModel):
-    messages: List[ChatMessage]
-    timestamp: str
+    # CORS設定
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors.allowed_origins,
+        allow_credentials=settings.cors.allow_credentials,
+        allow_methods=settings.cors.allow_methods,
+        allow_headers=settings.cors.allow_headers,
+    )
 
-class CreateReportRequest(BaseModel):
-    content: str  # Bot message content to visualize
-    timestamp: str
+    # 例外ハンドラー登録
+    app.add_exception_handler(CustomException, custom_exception_handler)
+    app.add_exception_handler(Exception, general_exception_handler)
 
-class CreateReportResponse(BaseModel):
-    code: str
-    timestamp: str
-    success: bool
+    # ルーター登録
+    app.include_router(chat.router)
+    app.include_router(dashboard.router)
+    app.include_router(auth.router)
 
-class ChatResponse(BaseModel):
-    message: str
-    timestamp: str
-    success: bool
+    @app.get("/")
+    async def root():
+        return {"message": "Tableau AI Chat API is running"}
 
-class JWTRequest(BaseModel):
-    username: str
+    return app
 
-class JWTResponse(BaseModel):
-    token: str
-    success: bool
 
-@app.get("/")
-async def root():
-    return {"message": "Tableau AI Chat API is running"}
-
-@app.post("/api/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest) -> ChatResponse:
-    try:
-        # messagesリストをBedrockのフォーマットに変換
-        bedrock_messages = [
-            {"role": msg.role, "content": msg.content} 
-            for msg in request.messages
-        ]
-        
-        # mcp.pyで全ての処理を実行
-        response_text = await mcp_client.process_query_with_history(bedrock_messages)
-        
-        return ChatResponse(
-            message=response_text,
-            timestamp=request.timestamp,
-            success=True
-        )
-        
-    except Exception as e:
-        print(f"Error processing chat request: {e}")
-        return ChatResponse(
-            message="申し訳ありません。現在システムでエラーが発生しています。しばらく後にもう一度お試しください。",
-            timestamp=request.timestamp,
-            success=False
-        )
-
-@app.post("/api/create_report", response_model=CreateReportResponse)
-async def create_report(request: CreateReportRequest) -> CreateReportResponse:
-    try:
-        response_text = await dashboard_generator.generate_dashboard_code(request.content)
-        
-        return CreateReportResponse(
-            code=response_text,
-            timestamp=request.timestamp,
-            success=True
-        )
-        
-    except Exception as e:
-        print(f"Error creating report: {e}")
-        return CreateReportResponse(
-            code="// エラーが発生しました",
-            timestamp=request.timestamp,
-            success=False
-        )
-
-@app.post("/api/create_chart", response_model=CreateReportResponse)
-async def create_chart(request: CreateReportRequest) -> CreateReportResponse:
-    try:
-        response_text = await dashboard_generator.generate_chart_code(request.content)
-        
-        return CreateReportResponse(
-            code=response_text,
-            timestamp=request.timestamp,
-            success=True
-        )
-        
-    except Exception as e:
-        print(f"Error creating chart: {e}")
-        return CreateReportResponse(
-            code="// エラーが発生しました",
-            timestamp=request.timestamp,
-            success=False
-        )
-
-@app.post("/api/jwt", response_model=JWTResponse)
-async def generate_jwt(request: JWTRequest) -> JWTResponse:
-    try:
-        # 環境変数から設定を取得
-        secret_id = os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET")
-        secret_value = os.getenv("TABLEAU_CONNECTED_APP_SECRET_VALUE")
-        client_id = os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID")
-
-        if not all([secret_id, secret_value, client_id]):
-            raise ValueError("Tableau Connected App credentials not configured")
-
-        # JWTトークンを生成
-        token = generate_jwt_token(
-            secret_id=secret_id,
-            secret_value=secret_value,
-            client_id=client_id,
-            username=request.username,
-            token_expiry_minutes=5  # 5分間有効
-        )
-
-        return JWTResponse(
-            token=token,
-            success=True
-        )
-
-    except Exception as e:
-        print(f"Error generating JWT: {e}")
-        return JWTResponse(
-            token="",
-            success=False
-        )
+app = create_app()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
