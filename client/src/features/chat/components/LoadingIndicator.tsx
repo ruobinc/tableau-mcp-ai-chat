@@ -180,49 +180,54 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = React.memo(
               </Box>
             </Box>
 
-            {/* 進行状況バー */}
-            <Box
-              sx={{
-                mt: 1,
-                height: 2,
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                borderRadius: 1,
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              <Box
-                sx={{
-                  height: '100%',
-                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                  borderRadius: 1,
-                  transition: 'width 0.3s ease',
-                  width: `${Math.min(((elapsedTime % 10000) / 10000) * 100, 100)}%`,
-                  willChange: 'width',
-                }}
-              />
-            </Box>
+            {/* 思考プロセス表示 */}
+            <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {['データ分析', '思考整理', '回答生成'].map((step, index) => (
+                <Box
+                  key={step}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    opacity: elapsedTime > index * 2000 ? 1 : 0.3,
+                    transition: 'opacity 0.5s ease',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 4,
+                      height: 4,
+                      borderRadius: '50%',
+                      backgroundColor: theme.palette.primary.main,
+                      mr: 0.5,
+                      animation: elapsedTime > index * 2000 ? `${pulseGlow} 1s ease-in-out infinite` : 'none',
+                      willChange: 'transform, opacity',
+                      transform: 'translateZ(0)',
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: '0.7rem',
+                      color: theme.palette.text.secondary,
+                      fontWeight: elapsedTime > index * 2000 ? 500 : 400,
+                    }}
+                  >
+                    {step}
+                  </Typography>
+                </Box>
+              ))}
 
-            {/* 経過時間表示 */}
-            <Typography
-              variant="caption"
-              sx={{
-                color: theme.palette.text.secondary,
-                fontSize: '0.7rem',
-                mt: 0.5,
-                display: 'block',
-              }}
-            >
-              {Math.floor(elapsedTime / 1000)}秒経過
+              {/* キャンセルボタン */}
               {onCancel && (
                 <Box
                   component="span"
                   onClick={onCancel}
                   sx={{
-                    ml: 1,
+                    ml: 'auto',
                     color: theme.palette.primary.main,
                     cursor: 'pointer',
                     textDecoration: 'underline',
+                    fontSize: '0.7rem',
                     '&:hover': {
                       color: theme.palette.primary.dark,
                     },
@@ -231,7 +236,7 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = React.memo(
                   キャンセル
                 </Box>
               )}
-            </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>
