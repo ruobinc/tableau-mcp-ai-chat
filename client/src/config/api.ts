@@ -24,5 +24,5 @@ export const apiEndpoints = {
   chat: `${API_BASE_URL}/api/chat`,
   createReport: `${API_BASE_URL}/api/create_report`,
   createChart: `${API_BASE_URL}/api/create_chart`,
-  jwt: `${API_BASE_URL}/api/jwt`
+  jwt: `${API_BASE_URL}/api/jwt`,
 } as const;

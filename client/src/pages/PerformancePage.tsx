@@ -1,14 +1,15 @@
-import { Box, Paper, Typography } from '@mui/material';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import { JWTProvider } from '../providers/JWTProvider';
-import TableauDashboard from '../features/tableau/TableauDashboard';
+import { Box, useTheme } from '@mui/material';
+
 import { tableauUserName } from '../config/tableau';
 import { ChatPanel } from '../features/chat/components/ChatPanel';
 import { ChatPreviewModal } from '../features/chat/components/ChatPreviewModal';
 import { useChat } from '../features/chat/hooks/useChat';
+import TableauDashboard from '../features/tableau/TableauDashboard';
+import { JWTProvider } from '../providers/JWTProvider';
 
 const PerformancePage = () => {
   const chatHook = useChat();
+  const theme = useTheme();
 
   return (
     <JWTProvider defaultUsername={tableauUserName || 'default-user'} prefetchDefaultToken>
@@ -18,7 +19,8 @@ const PerformancePage = () => {
           display: 'flex',
           overflow: 'hidden',
           position: 'relative',
-          backgroundColor: '#f8fafc'
+          backgroundColor: theme.palette.background.default,
+          transition: 'background-color 0.3s ease',
         }}
       >
         {/* ダッシュボードエリア */}
@@ -27,15 +29,33 @@ const PerformancePage = () => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: '#ffffff',
-            overflow: 'hidden'
+            backgroundColor: theme.palette.background.paper,
+            overflow: 'hidden',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '2px',
+              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              opacity: 0.7,
+              zIndex: 1,
+            },
           }}
         >
           <Box
             sx={{
               flexGrow: 1,
-              backgroundColor: '#ffffff',
+              backgroundColor: theme.palette.background.paper,
               position: 'relative',
+              borderRadius: { xs: 0, md: '12px 0 0 0' },
+              overflow: 'hidden',
+              boxShadow:
+                theme.palette.mode === 'dark'
+                  ? 'inset 0 1px 3px rgba(255, 255, 255, 0.05)'
+                  : 'inset 0 1px 3px rgba(0, 0, 0, 0.05)',
             }}
           >
             <TableauDashboard username={tableauUserName} />

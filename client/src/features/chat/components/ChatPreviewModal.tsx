@@ -1,7 +1,7 @@
-import { FC } from 'react';
-import { Box, Paper, Typography, IconButton } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import CloseIcon from '@mui/icons-material/Close';
+import { Box, IconButton, Paper, Typography } from '@mui/material';
+import { FC } from 'react';
 
 interface ChatPreviewModalProps {
   open: boolean;
@@ -28,7 +28,7 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        p: { xs: 1, sm: 2 }
+        p: { xs: 1, sm: 2 },
       }}
     >
       <Paper
@@ -40,7 +40,7 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
           flexDirection: 'column',
           borderRadius: 3,
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         <Box
@@ -51,7 +51,7 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -66,8 +66,8 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
               color: 'rgba(255, 255, 255, 0.9)',
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                color: 'white'
-              }
+                color: 'white',
+              },
             }}
           >
             <CloseIcon />
@@ -78,7 +78,7 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
           sx={{
             flexGrow: 1,
             position: 'relative',
-            backgroundColor: '#f8fafc'
+            backgroundColor: '#f8fafc',
           }}
         >
           {code ? (
@@ -89,7 +89,7 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
                 height: '100%',
                 border: 'none',
                 backgroundColor: 'white',
-                borderRadius: '0 0 12px 12px'
+                borderRadius: '0 0 12px 12px',
               }}
               sandbox="allow-scripts"
               title="LLM Preview"
@@ -102,7 +102,7 @@ export const ChatPreviewModal: FC<ChatPreviewModalProps> = ({ open, code, onClos
                 alignItems: 'center',
                 justifyContent: 'center',
                 height: '100%',
-                color: '#64748b'
+                color: '#64748b',
               }}
             >
               <Typography variant="body1" sx={{ fontWeight: 500 }}>

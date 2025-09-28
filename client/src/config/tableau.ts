@@ -14,18 +14,18 @@ export const pulseMetrics = [
   {
     id: 'd6cb961b-76a9-46d1-b6d6-c4710d3b0186',
     name: '売上',
-    description: '売上のメトリクス'
+    description: '売上のメトリクス',
   },
   {
     id: 'a1b0f9b5-5c85-420a-9a04-9ca32b012086',
     name: '利益',
-    description: '利益のメトリクス'
+    description: '利益のメトリクス',
   },
   {
     id: '6cdf2b36-c5ae-42a0-bfd2-f430a5529463',
     name: 'オーダー数',
-    description: 'オーダー数のメトリクス'
-  }
+    description: 'オーダー数のメトリクス',
+  },
 ];
 
 export const pulseSiteName = siteId;

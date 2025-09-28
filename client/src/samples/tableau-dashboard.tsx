@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
-import { JWTProvider } from '../providers/JWTProvider';
+
 import TableauDashboard from '../features/tableau/TableauDashboard';
+import { JWTProvider } from '../providers/JWTProvider';
 
 export default function TableauDashboardSample() {
   return (

@@ -1,18 +1,22 @@
-import { Box, Typography, Paper } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import { JWTProvider } from '../providers/JWTProvider';
-import TableauPulseEmbed from '../features/tableau/TableauPulseEmbed';
+import { Box, Paper, Typography, useTheme } from '@mui/material';
+
 import { pulseMetrics, pulseSiteName, tableauUserName } from '../config/tableau';
+import TableauPulseEmbed from '../features/tableau/TableauPulseEmbed';
+import { JWTProvider } from '../providers/JWTProvider';
 
 const PulsePage = () => {
+  const theme = useTheme();
+
   return (
     <JWTProvider defaultUsername={tableauUserName || 'default-user'} prefetchDefaultToken>
       <Box
         sx={{
-          height: '100vh',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#f8fafc'
+          backgroundColor: theme.palette.background.default,
+          transition: 'background-color 0.3s ease',
         }}
       >
         {/* ヘッダー */}
@@ -20,15 +24,16 @@ const PulsePage = () => {
           elevation={0}
           sx={{
             borderRadius: 0,
-            borderBottom: '1px solid #e2e8f0',
+            borderBottom: `1px solid ${theme.palette.divider}`,
             px: 3,
             py: 2,
-            backgroundColor: '#ffffff'
+            backgroundColor: theme.palette.background.paper,
+            transition: 'background-color 0.3s ease',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <TrendingUpIcon sx={{ color: '#3b82f6', fontSize: 20 }} />
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '1.1rem' }}>
+            <TrendingUpIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
+            <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem' }} >
               Tableau Pulse メトリクス
             </Typography>
           </Box>
@@ -40,7 +45,7 @@ const PulsePage = () => {
             flexGrow: 1,
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: '#f8fafc'
+            backgroundColor: theme.palette.background.default,
           }}
         >
           {pulseMetrics.length > 0 ? (
@@ -48,12 +53,15 @@ const PulsePage = () => {
               {/* メトリクス一覧セクション */}
               <Box
                 sx={{
-                  backgroundColor: '#ffffff',
-                  borderBottom: '1px solid #e2e8f0',
-                  p: 3
+                  backgroundColor: theme.palette.background.paper,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  p: 3,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '1.1rem', mb: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem', mb: 2 }}
+                >
                   メトリクス一覧
                 </Typography>
                 <Box
@@ -62,9 +70,9 @@ const PulsePage = () => {
                     gridTemplateColumns: {
                       xs: 'repeat(auto-fill, minmax(240px, 1fr))',
                       md: 'repeat(auto-fill, minmax(280px, 1fr))',
-                      xl: 'repeat(4, minmax(280px, 1fr))'
+                      xl: 'repeat(4, minmax(280px, 1fr))',
                     },
-                    gap: 3
+                    gap: 3,
                   }}
                 >
                   {pulseMetrics.map((metric) => (
@@ -72,16 +80,23 @@ const PulsePage = () => {
                       key={metric.id}
                       elevation={0}
                       sx={{
-                        border: '1px solid #e2e8f0',
+                        border: `1px solid ${theme.palette.divider}`,
                         borderRadius: 2,
                         p: 1.5,
-                        backgroundColor: '#f8fafc',
+                        backgroundColor: theme.palette.background.default,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: theme.palette.mode === 'dark'
+                            ? '0 4px 20px rgba(0,0,0,0.3)'
+                            : '0 4px 20px rgba(0,0,0,0.1)',
+                        },
                         minHeight: 480,
                         display: 'flex',
-                        flexDirection: 'column'
+                        flexDirection: 'column',
                       }}
                     >
-                      <Typography variant="subtitle2" sx={{ color: '#64748b', mb: 1, px: 1 }}>
+                      <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, mb: 1, px: 1 }}>
                         {metric.name}
                       </Typography>
                       <Box sx={{ flexGrow: 1 }}>
@@ -105,13 +120,16 @@ const PulsePage = () => {
                 sx={{
                   flexGrow: 1,
                   position: 'relative',
-                  backgroundColor: '#ffffff',
+                  backgroundColor: theme.palette.background.paper,
                   overflow: 'hidden',
-                  minHeight: '800px'
+                  minHeight: '800px',
                 }}
               >
-                <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '1.1rem' }}>
+                <Box sx={{ p: 3, borderBottom: `1px solid ${theme.palette.divider}` }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem' }}
+                  >
                     メトリクス詳細
                   </Typography>
                 </Box>
@@ -119,11 +137,11 @@ const PulsePage = () => {
                   <Paper
                     elevation={0}
                     sx={{
-                      border: '1px solid #e2e8f0',
+                      border: `1px solid ${theme.palette.divider}`,
                       borderRadius: 2,
                       p: 1.5,
                       minHeight: 800,
-                      backgroundColor: '#f8fafc'
+                      backgroundColor: theme.palette.background.default,
                     }}
                   >
                     <TableauPulseEmbed
@@ -132,7 +150,7 @@ const PulsePage = () => {
                       metricId={pulseMetrics[0].id}
                       siteName={pulseSiteName}
                       width="100%"
-                      height="760px"
+                      height="1500px"
                       layout="default"
                     />
                   </Paper>
@@ -146,25 +164,25 @@ const PulsePage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 4
+                p: 4,
               }}
             >
               <Paper
                 elevation={0}
                 sx={{
-                  border: '1px dashed #cbd5e1',
+                  border: `1px dashed ${theme.palette.divider}`,
                   borderRadius: 2,
                   p: 4,
-                  backgroundColor: '#f8fafc',
+                  backgroundColor: theme.palette.background.default,
                   textAlign: 'center',
-                  maxWidth: 400
+                  maxWidth: 400,
                 }}
               >
-                <TrendingUpIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 2 }} />
-                <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 500, mb: 1 }}>
+                <TrendingUpIcon sx={{ fontSize: 48, color: theme.palette.text.disabled, mb: 2 }} />
+                <Typography variant="h6" sx={{ color: theme.palette.text.secondary, fontWeight: 500, mb: 1 }}>
                   メトリクスが設定されていません
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                <Typography variant="body2" sx={{ color: theme.palette.text.disabled }}>
                   .env.local でTableau Pulseメトリクスを設定してください。
                 </Typography>
               </Paper>

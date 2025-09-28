@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import { useJWTContext } from '../../../providers/JWTProvider';
 
 export const useJWTToken = (username: string) => {
@@ -38,6 +39,6 @@ export const useJWTToken = (username: string) => {
     loading,
     error,
     refetch: fetchJWTToken,
-    clearToken
+    clearToken,
   };
 };

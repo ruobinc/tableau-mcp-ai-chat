@@ -1,7 +1,8 @@
-import { useEffect, useState, type FC } from 'react';
-import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import { TableauViz } from '@tableau/embedding-api-react';
+import { type FC, useEffect, useState } from 'react';
+
 import { tableauEmbeddedUrl, tableauUserName } from '../../config/tableau';
 import { useJWTToken } from './hooks/useJWTToken';
 
@@ -41,14 +42,17 @@ const TableauDashboard: FC<TableauDashboardProps> = ({ username }) => {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          p: 4
+          p: 4,
         }}
       >
         <BarChartIcon sx={{ fontSize: 80, color: '#cbd5e1', mb: 2 }} />
         <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 500, mb: 1 }}>
           Tableau設定が必要です
         </Typography>
-        <Typography variant="body2" sx={{ color: '#94a3b8', maxWidth: 400, lineHeight: 1.6, textAlign: 'center' }}>
+        <Typography
+          variant="body2"
+          sx={{ color: '#94a3b8', maxWidth: 400, lineHeight: 1.6, textAlign: 'center' }}
+        >
           .env.local で Tableau サーバーの設定を行ってください。
         </Typography>
       </Box>
@@ -64,7 +68,7 @@ const TableauDashboard: FC<TableauDashboardProps> = ({ username }) => {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          p: 4
+          p: 4,
         }}
       >
         <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />
@@ -84,7 +88,7 @@ const TableauDashboard: FC<TableauDashboardProps> = ({ username }) => {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          p: 4
+          p: 4,
         }}
       >
         <Alert severity="error" sx={{ mb: 2, maxWidth: 400 }}>
@@ -102,7 +106,7 @@ const TableauDashboard: FC<TableauDashboardProps> = ({ username }) => {
       sx={{
         height: '100%',
         width: '100%',
-        position: 'relative'
+        position: 'relative',
       }}
     >
       {jwtToken ? (
@@ -122,7 +126,7 @@ const TableauDashboard: FC<TableauDashboardProps> = ({ username }) => {
             alignItems: 'center',
             justifyContent: 'center',
             height: '100%',
-            p: 4
+            p: 4,
           }}
         >
           <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />

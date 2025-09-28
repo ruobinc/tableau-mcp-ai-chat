@@ -1,14 +1,15 @@
 import {
   createContext,
+  type FC,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type FC,
-  type ReactNode
 } from 'react';
+
 import { apiEndpoints } from '../config/api';
 
 interface JWTResponse {
@@ -39,7 +40,7 @@ const decodeExpiry = (token: string): number => {
       decodeURIComponent(
         atob(base64)
           .split('')
-          .map((c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
+          .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
           .join('')
       )
     );
@@ -99,9 +100,9 @@ const fetchJWTFromAPI = async (username: string): Promise<string> => {
   const response = await fetch(apiEndpoints.jwt, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ username })
+    body: JSON.stringify({ username }),
   });
 
   if (!response.ok) {
@@ -128,7 +129,7 @@ interface JWTProviderProps {
 export const JWTProvider: FC<JWTProviderProps> = ({
   children,
   defaultUsername = 'default-user',
-  prefetchDefaultToken = false
+  prefetchDefaultToken = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const tokenCacheRef = useRef<Map<string, Promise<string>>>(new Map());
@@ -208,7 +209,7 @@ export const JWTProvider: FC<JWTProviderProps> = ({
     () => ({
       getToken,
       clearToken,
-      isLoading
+      isLoading,
     }),
     [getToken, clearToken, isLoading]
   );

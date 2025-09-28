@@ -1,10 +1,11 @@
-import { useEffect, useState, type FC } from 'react';
-import { Alert, Box, CircularProgress, Typography, Paper } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { Alert, Box, CircularProgress, Paper, Typography } from '@mui/material';
 import { TableauPulse } from '@tableau/embedding-api-react';
+import { type FC, useEffect, useState } from 'react';
+
+import { pulseMetrics, pulseSiteName, tableauUserName } from '../../config/tableau';
 import { JWTProvider } from '../../providers/JWTProvider';
 import { useJWTToken } from './hooks/useJWTToken';
-import { pulseMetrics, pulseSiteName, tableauUserName } from '../../config/tableau';
 
 interface SinglePulseProps {
   username?: string;
@@ -32,7 +33,7 @@ const SinglePulse: FC<SinglePulseProps> = ({
   siteName = '',
   height = '100%',
   width = '100%',
-  layout = 'default'
+  layout = 'default',
 }) => {
   const [isMounted, setIsMounted] = useState(false);
   const { jwtToken, loading, error } = useJWTToken(username);
@@ -54,14 +55,17 @@ const SinglePulse: FC<SinglePulseProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          p: 4
+          p: 4,
         }}
       >
         <TrendingUpIcon sx={{ fontSize: 80, color: '#cbd5e1', mb: 2 }} />
         <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 500, mb: 1 }}>
           Tableau Pulse設定が必要です
         </Typography>
-        <Typography variant="body2" sx={{ color: '#94a3b8', maxWidth: 400, lineHeight: 1.6, textAlign: 'center' }}>
+        <Typography
+          variant="body2"
+          sx={{ color: '#94a3b8', maxWidth: 400, lineHeight: 1.6, textAlign: 'center' }}
+        >
           メトリクスIDを設定してTableau Pulseを表示してください。
         </Typography>
       </Box>
@@ -77,7 +81,7 @@ const SinglePulse: FC<SinglePulseProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          p: 4
+          p: 4,
         }}
       >
         <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />
@@ -97,7 +101,7 @@ const SinglePulse: FC<SinglePulseProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          p: 4
+          p: 4,
         }}
       >
         <Alert severity="error" sx={{ mb: 2, maxWidth: 400 }}>
@@ -121,7 +125,7 @@ const SinglePulse: FC<SinglePulseProps> = ({
     <Box
       sx={{
         width: '100%',
-        height: '100%'
+        height: '100%',
       }}
     >
       {jwtToken ? (
@@ -140,11 +144,14 @@ const SinglePulse: FC<SinglePulseProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             height: '100%',
-            p: 4
+            p: 4,
           }}
         >
           <CircularProgress size={40} sx={{ color: '#3b82f6', mb: 2 }} />
-          <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 500, textAlign: 'center' }}>
+          <Typography
+            variant="body1"
+            sx={{ color: '#64748b', fontWeight: 500, textAlign: 'center' }}
+          >
             認証中...
           </Typography>
         </Box>
@@ -180,10 +187,10 @@ const MultiplePulseView: FC = () => {
               gridTemplateColumns: {
                 xs: 'repeat(auto-fill, minmax(300px, 1fr))',
                 md: 'repeat(auto-fill, minmax(350px, 1fr))',
-                lg: 'repeat(3, 1fr)'
+                lg: 'repeat(3, 1fr)',
               },
               gap: 3,
-              mb: 4
+              mb: 4,
             }}
           >
             {pulseMetrics.map((metric) => (
@@ -195,7 +202,7 @@ const MultiplePulseView: FC = () => {
                   borderRadius: 2,
                   p: 1.5,
                   backgroundColor: '#f8fafc',
-                  minHeight: 400
+                  minHeight: 400,
                 }}
               >
                 <Typography variant="subtitle2" sx={{ color: '#64748b', mb: 1, px: 1 }}>
@@ -223,7 +230,7 @@ const MultiplePulseView: FC = () => {
               borderRadius: 2,
               p: 1.5,
               backgroundColor: '#f8fafc',
-              minHeight: 600
+              minHeight: 600,
             }}
           >
             <SinglePulse
@@ -244,7 +251,7 @@ const MultiplePulseView: FC = () => {
             borderRadius: 2,
             p: 4,
             backgroundColor: '#f8fafc',
-            textAlign: 'center'
+            textAlign: 'center',
           }}
         >
           <TrendingUpIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 2 }} />
@@ -268,7 +275,7 @@ const TableauPulseEmbed: FC<TableauPulseEmbedProps> = ({
   siteName,
   height,
   width,
-  layout
+  layout,
 }) => {
   if (mode === 'multiple') {
     return (

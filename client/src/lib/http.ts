@@ -9,16 +9,16 @@ export async function postJson<TResponse, TBody = unknown>({
   url,
   body,
   signal,
-  headers
+  headers,
 }: PostJsonOptions<TBody>): Promise<TResponse> {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...headers
+      ...headers,
     },
     body: JSON.stringify(body),
-    signal
+    signal,
   });
 
   if (!response.ok) {

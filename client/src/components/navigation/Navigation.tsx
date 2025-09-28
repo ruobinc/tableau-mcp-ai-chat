@@ -1,20 +1,33 @@
+import {
+  AccountCircle,
+  Assessment as AssessmentIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  BarChart as BarChartIcon,
+  DarkMode as DarkModeIcon,
+  Home as HomeIcon,
+  LightMode as LightModeIcon,
+  Menu as MenuIcon,
+  TrendingUp as TrendingUpIcon,
+} from '@mui/icons-material';
+import {
+  alpha,
+  Box,
+  Fade,
+  IconButton,
+  Menu,
+  MenuItem,
+  Paper,
+  Tab,
+  Tabs,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
-import Paper from '@mui/material/Paper';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import HomeIcon from '@mui/icons-material/Home';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AssessmentIcon from '@mui/icons-material/Assessment';
+
+import { useDarkMode } from '../../App';
 
 interface NavigationProps {
   title?: string;
@@ -59,82 +72,221 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
 
   const menuId = 'primary-search-account-menu';
 
+  const theme = useTheme();
+  const { darkMode, toggleDarkMode } = useDarkMode();
+
   return (
     <>
       <Paper
-        elevation={1}
+        elevation={0}
         sx={{
           borderRadius: 0,
-          borderBottom: '1px solid #e2e8f0'
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: alpha(theme.palette.background.paper, 0.8),
+          backdropFilter: 'blur(20px)',
+          position: 'relative',
+          zIndex: 1100,
+          transition: 'all 0.3s ease',
         }}
       >
         <Toolbar
           sx={{
             px: { xs: 2, sm: 3 },
-            minHeight: { xs: '56px', sm: '64px' }
+            minHeight: { xs: '64px', sm: '72px' },
+            position: 'relative',
           }}
         >
-          <IconButton
-            size="medium"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2, color: '#64748b' }}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, minWidth: 0 }}>
-            <BarChartIcon sx={{ mr: 1.5, color: '#3b82f6', fontSize: 28 }} />
-            <Typography
-              variant="h6"
+          <Tooltip title="メニュー" arrow>
+            <IconButton
+              size="medium"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
               sx={{
-                fontWeight: 600,
-                color: '#1e293b',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                mr: 3,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                mr: 2,
+                color: theme.palette.text.secondary,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  transform: 'scale(1.1)',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                },
               }}
             >
-              {title || 'Tableau Analytics Dashboard'}
-            </Typography>
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, minWidth: 0 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                mr: 3,
+                position: 'relative',
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <BarChartIcon
+                  sx={{
+                    mr: 1.5,
+                    color: theme.palette.primary.main,
+                    fontSize: 32,
+                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
+                    transition: 'filter 0.3s ease',
+                  }}
+                />
+                <AutoAwesomeIcon
+                  sx={{
+                    position: 'absolute',
+                    top: -4,
+                    right: 8,
+                    fontSize: 14,
+                    color: theme.palette.secondary.main,
+                    transition: 'transform 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1) rotate(15deg)',
+                    },
+                  }}
+                />
+              </Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontSize: { xs: '1.1rem', sm: '1.3rem' },
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                {title || 'Tableau Analytics Dashboard'}
+              </Typography>
+            </Box>
 
             <Tabs
               value={currentTab}
               onChange={handleTabChange}
               sx={{
-                '& .MuiTabs-indicator': { backgroundColor: '#3b82f6' },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: theme.palette.primary.main,
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                },
                 '& .MuiTab-root': {
-                  color: '#64748b',
+                  color: theme.palette.text.secondary,
                   fontWeight: 500,
                   fontSize: '0.9rem',
                   textTransform: 'none',
                   minHeight: 48,
-                  '&.Mui-selected': { color: '#3b82f6' },
-                  '&:hover': { color: '#475569' }
-                }
+                  transition: 'all 0.2s ease',
+                  borderRadius: '12px 12px 0 0',
+                  '&.Mui-selected': {
+                    color: theme.palette.primary.main,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    fontWeight: 600,
+                  },
+                  '&:hover': {
+                    color: theme.palette.text.primary,
+                    backgroundColor: alpha(theme.palette.action.hover, 0.5),
+                    transform: 'translateY(-1px)',
+                  },
+                },
               }}
             >
-              <Tab icon={<HomeIcon />} iconPosition="start" label="ホーム" sx={{ gap: 1 }} />
-              <Tab icon={<AssessmentIcon />} iconPosition="start" label="業績一覧" sx={{ gap: 1 }} />
-              <Tab icon={<TrendingUpIcon />} iconPosition="start" label="メトリクス" sx={{ gap: 1 }} />
+              <Tab
+                icon={<HomeIcon sx={{ transition: 'transform 0.2s ease' }} />}
+                iconPosition="start"
+                label="ホーム"
+                sx={{ gap: 1 }}
+              />
+              <Tab
+                icon={<AssessmentIcon sx={{ transition: 'transform 0.2s ease' }} />}
+                iconPosition="start"
+                label="業績一覧"
+                sx={{ gap: 1 }}
+              />
+              <Tab
+                icon={<TrendingUpIcon sx={{ transition: 'transform 0.2s ease' }} />}
+                iconPosition="start"
+                label="メトリクス"
+                sx={{ gap: 1 }}
+              />
             </Tabs>
           </Box>
 
-          <IconButton
-            size="medium"
-            edge="end"
-            aria-label="account"
-            aria-controls={menuId}
-            aria-haspopup="true"
-            onClick={handleProfileMenuOpen}
-            sx={{ color: '#64748b' }}
-          >
-            <AccountCircle />
-          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'} arrow>
+              <IconButton
+                onClick={toggleDarkMode}
+                sx={{
+                  color: theme.palette.text.secondary,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    color: theme.palette.primary.main,
+                    transform: 'scale(1.1) rotate(360deg)',
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                <Fade in={darkMode} timeout={300}>
+                  <LightModeIcon sx={{ position: darkMode ? 'static' : 'absolute' }} />
+                </Fade>
+                <Fade in={!darkMode} timeout={300}>
+                  <DarkModeIcon sx={{ position: !darkMode ? 'static' : 'absolute' }} />
+                </Fade>
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="アカウント" arrow>
+              <IconButton
+                size="medium"
+                edge="end"
+                aria-label="account"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                onClick={handleProfileMenuOpen}
+                sx={{
+                  color: theme.palette.text.secondary,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    color: theme.palette.primary.main,
+                    transform: 'scale(1.1)',
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                <AccountCircle />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Toolbar>
+
+        {/* グラデーションボーダー */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '2px',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+            backgroundSize: '200% 100%',
+            opacity: 0.8,
+          }}
+        />
       </Paper>
 
       <Menu
@@ -145,9 +297,54 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={isMenuOpen}
         onClose={handleMenuClose}
+        slotProps={{
+          paper: {
+            sx: {
+              mt: 1,
+              borderRadius: 2,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: alpha(theme.palette.background.paper, 0.9),
+              backdropFilter: 'blur(20px)',
+              minWidth: 180,
+            },
+          },
+        }}
       >
-        <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+        <MenuItem
+          onClick={handleMenuClose}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 1,
+            mx: 1,
+            my: 0.5,
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              transform: 'translateX(4px)',
+            },
+          }}
+        >
+          プロフィール
+        </MenuItem>
+        <MenuItem
+          onClick={handleMenuClose}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 1,
+            mx: 1,
+            my: 0.5,
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              transform: 'translateX(4px)',
+            },
+          }}
+        >
+          アカウント設定
+        </MenuItem>
       </Menu>
     </>
   );
