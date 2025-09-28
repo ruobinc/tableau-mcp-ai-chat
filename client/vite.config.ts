@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     headers: {
-      'Content-Security-Policy': "trusted-types * 'allow-duplicates';"
-    }
-  }
+      'Content-Security-Policy': "trusted-types * 'allow-duplicates';",
+    },
+  },
 });

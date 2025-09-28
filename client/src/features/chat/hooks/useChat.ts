@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 
 import { apiEndpoints } from '../../../config/api';
 import { postJson } from '../../../lib/http';
+import { generateId, generateTimestamp } from '../../../utils/date';
 import { ChatHookState, ChatMessage } from '../types';
 
 interface ApiChatMessage {
@@ -61,8 +62,8 @@ export const useChat = () => {
         ...prev.messages,
         {
           ...message,
-          id: Date.now() + Math.random(),
-          timestamp: new Date().toISOString(),
+          id: generateId(),
+          timestamp: generateTimestamp(),
         },
       ],
     }));
@@ -99,7 +100,7 @@ export const useChat = () => {
           url: apiEndpoints.chat,
           body: {
             messages: allMessages,
-            timestamp: new Date().toISOString(),
+            timestamp: generateTimestamp(),
           },
         });
 
@@ -117,7 +118,7 @@ export const useChat = () => {
         setState((prev) => ({ ...prev, isLoading: false }));
       }
     },
-    [state.isLoading, addMessage]
+    [state.isLoading, state.messages, addMessage]
   );
 
   const updateMessage = useCallback((messageId: number, updates: Partial<ChatMessage>) => {
@@ -148,7 +149,7 @@ export const useChat = () => {
           url: apiEndpoints.createReport,
           body: {
             content: message.text,
-            timestamp: new Date().toISOString(),
+            timestamp: generateTimestamp(),
           },
         });
 
@@ -186,7 +187,7 @@ export const useChat = () => {
           url: apiEndpoints.createChart,
           body: {
             content: message.text,
-            timestamp: new Date().toISOString(),
+            timestamp: generateTimestamp(),
           },
         });
 

@@ -33,7 +33,10 @@ const PulsePage = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <TrendingUpIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
-            <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem' }} >
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem' }}
+            >
               Tableau Pulse メトリクス
             </Typography>
           </Box>
@@ -60,7 +63,12 @@ const PulsePage = () => {
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem', mb: 2 }}
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                    fontSize: '1.1rem',
+                    mb: 2,
+                  }}
                 >
                   メトリクス一覧
                 </Typography>
@@ -87,16 +95,20 @@ const PulsePage = () => {
                         transition: 'all 0.3s ease',
                         '&:hover': {
                           transform: 'translateY(-2px)',
-                          boxShadow: theme.palette.mode === 'dark'
-                            ? '0 4px 20px rgba(0,0,0,0.3)'
-                            : '0 4px 20px rgba(0,0,0,0.1)',
+                          boxShadow:
+                            theme.palette.mode === 'dark'
+                              ? '0 4px 20px rgba(0,0,0,0.3)'
+                              : '0 4px 20px rgba(0,0,0,0.1)',
                         },
                         minHeight: 480,
                         display: 'flex',
                         flexDirection: 'column',
                       }}
                     >
-                      <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, mb: 1, px: 1 }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ color: theme.palette.text.secondary, mb: 1, px: 1 }}
+                      >
                         {metric.name}
                       </Typography>
                       <Box sx={{ flexGrow: 1 }}>
@@ -179,7 +191,10 @@ const PulsePage = () => {
                 }}
               >
                 <TrendingUpIcon sx={{ fontSize: 48, color: theme.palette.text.disabled, mb: 2 }} />
-                <Typography variant="h6" sx={{ color: theme.palette.text.secondary, fontWeight: 500, mb: 1 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ color: theme.palette.text.secondary, fontWeight: 500, mb: 1 }}
+                >
                   メトリクスが設定されていません
                 </Typography>
                 <Typography variant="body2" sx={{ color: theme.palette.text.disabled }}>

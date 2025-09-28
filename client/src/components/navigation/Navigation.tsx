@@ -27,7 +27,7 @@ import {
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { useDarkMode } from '../../App';
+import { useDarkMode } from '../../contexts/DarkModeContext';
 
 interface NavigationProps {
   title?: string;
