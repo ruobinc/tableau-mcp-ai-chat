@@ -10,7 +10,6 @@ import {
   TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import {
-  alpha,
   Box,
   Fade,
   IconButton,
@@ -28,6 +27,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDarkMode } from '../../contexts/DarkModeContext';
+import { createNavigationStyles } from './navigation-styles';
 
 interface NavigationProps {
   title?: string;
@@ -37,6 +37,10 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  const theme = useTheme();
+  const { darkMode, toggleDarkMode } = useDarkMode();
+  const styles = createNavigationStyles(theme);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -55,157 +59,40 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
   };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    switch (newValue) {
-      case 0:
-        navigate('/home');
-        break;
-      case 1:
-        navigate('/performance');
-        break;
-      case 2:
-        navigate('/pulse');
-        break;
-      default:
-        break;
-    }
+    const routes = ['/home', '/performance', '/pulse'];
+    navigate(routes[newValue] || '/home');
   };
 
   const menuId = 'primary-search-account-menu';
 
-  const theme = useTheme();
-  const { darkMode, toggleDarkMode } = useDarkMode();
-
   return (
     <>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 0,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          backgroundColor: alpha(theme.palette.background.paper, 0.8),
-          backdropFilter: 'blur(20px)',
-          position: 'relative',
-          zIndex: 1100,
-          transition: 'all 0.3s ease',
-        }}
-      >
-        <Toolbar
-          sx={{
-            px: { xs: 2, sm: 3 },
-            minHeight: { xs: '64px', sm: '72px' },
-            position: 'relative',
-          }}
-        >
+      <Paper elevation={0} sx={styles.container}>
+        <Toolbar sx={styles.toolbar}>
           <Tooltip title="メニュー" arrow>
             <IconButton
               size="medium"
               edge="start"
               color="inherit"
               aria-label="menu"
-              sx={{
-                mr: 2,
-                color: theme.palette.text.secondary,
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  color: theme.palette.primary.main,
-                  transform: 'scale(1.1)',
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
+              sx={styles.menuButton}
             >
               <MenuIcon />
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, minWidth: 0 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                mr: 3,
-                position: 'relative',
-              }}
-            >
-              <Box
-                sx={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <BarChartIcon
-                  sx={{
-                    mr: 1.5,
-                    color: theme.palette.primary.main,
-                    fontSize: 32,
-                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
-                    transition: 'filter 0.3s ease',
-                  }}
-                />
-                <AutoAwesomeIcon
-                  sx={{
-                    position: 'absolute',
-                    top: -4,
-                    right: 8,
-                    fontSize: 14,
-                    color: theme.palette.secondary.main,
-                    transition: 'transform 0.3s ease',
-                    '&:hover': {
-                      transform: 'scale(1.1) rotate(15deg)',
-                    },
-                  }}
-                />
+          <Box sx={styles.logoContainer}>
+            <Box sx={styles.logoBox}>
+              <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <BarChartIcon sx={styles.logoIcon} />
+                <AutoAwesomeIcon sx={styles.sparkleIcon} />
               </Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontSize: { xs: '1.1rem', sm: '1.3rem' },
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                }}
-              >
+              <Typography variant="h6" sx={styles.title}>
                 {title || 'Tableau Analytics Dashboard'}
               </Typography>
             </Box>
 
-            <Tabs
-              value={currentTab}
-              onChange={handleTabChange}
-              sx={{
-                '& .MuiTabs-indicator': {
-                  backgroundColor: theme.palette.primary.main,
-                  height: 3,
-                  borderRadius: '3px 3px 0 0',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                },
-                '& .MuiTab-root': {
-                  color: theme.palette.text.secondary,
-                  fontWeight: 500,
-                  fontSize: '0.9rem',
-                  textTransform: 'none',
-                  minHeight: 48,
-                  transition: 'all 0.2s ease',
-                  borderRadius: '12px 12px 0 0',
-                  '&.Mui-selected': {
-                    color: theme.palette.primary.main,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                    fontWeight: 600,
-                  },
-                  '&:hover': {
-                    color: theme.palette.text.primary,
-                    backgroundColor: alpha(theme.palette.action.hover, 0.5),
-                    transform: 'translateY(-1px)',
-                  },
-                },
-              }}
-            >
+            <Tabs value={currentTab} onChange={handleTabChange} sx={styles.tabs}>
               <Tab
                 icon={<HomeIcon sx={{ transition: 'transform 0.2s ease' }} />}
                 iconPosition="start"
@@ -227,20 +114,9 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
             </Tabs>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={styles.rightSection}>
             <Tooltip title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'} arrow>
-              <IconButton
-                onClick={toggleDarkMode}
-                sx={{
-                  color: theme.palette.text.secondary,
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    transform: 'scale(1.1) rotate(360deg)',
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                  },
-                }}
-              >
+              <IconButton onClick={toggleDarkMode} sx={styles.themeToggle}>
                 <Fade in={darkMode} timeout={300}>
                   <LightModeIcon sx={{ position: darkMode ? 'static' : 'absolute' }} />
                 </Fade>
@@ -258,15 +134,7 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
                 aria-controls={menuId}
                 aria-haspopup="true"
                 onClick={handleProfileMenuOpen}
-                sx={{
-                  color: theme.palette.text.secondary,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    transform: 'scale(1.1)',
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                  },
-                }}
+                sx={styles.accountButton}
               >
                 <AccountCircle />
               </IconButton>
@@ -274,19 +142,7 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
           </Box>
         </Toolbar>
 
-        {/* グラデーションボーダー */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '2px',
-            background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-            backgroundSize: '200% 100%',
-            opacity: 0.8,
-          }}
-        />
+        <Box sx={styles.gradientBorder} />
       </Paper>
 
       <Menu
@@ -299,50 +155,14 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
         onClose={handleMenuClose}
         slotProps={{
           paper: {
-            sx: {
-              mt: 1,
-              borderRadius: 2,
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-              border: `1px solid ${theme.palette.divider}`,
-              backgroundColor: alpha(theme.palette.background.paper, 0.9),
-              backdropFilter: 'blur(20px)',
-              minWidth: 180,
-            },
+            sx: styles.menu,
           },
         }}
       >
-        <MenuItem
-          onClick={handleMenuClose}
-          sx={{
-            py: 1.5,
-            px: 2,
-            borderRadius: 1,
-            mx: 1,
-            my: 0.5,
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              transform: 'translateX(4px)',
-            },
-          }}
-        >
+        <MenuItem onClick={handleMenuClose} sx={styles.menuItem}>
           プロフィール
         </MenuItem>
-        <MenuItem
-          onClick={handleMenuClose}
-          sx={{
-            py: 1.5,
-            px: 2,
-            borderRadius: 1,
-            mx: 1,
-            my: 0.5,
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              transform: 'translateX(4px)',
-            },
-          }}
-        >
+        <MenuItem onClick={handleMenuClose} sx={styles.menuItem}>
           アカウント設定
         </MenuItem>
       </Menu>

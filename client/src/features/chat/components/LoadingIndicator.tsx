@@ -199,7 +199,10 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = React.memo(
                       borderRadius: '50%',
                       backgroundColor: theme.palette.primary.main,
                       mr: 0.5,
-                      animation: elapsedTime > index * 2000 ? `${pulseGlow} 1s ease-in-out infinite` : 'none',
+                      animation:
+                        elapsedTime > index * 2000
+                          ? `${pulseGlow} 1s ease-in-out infinite`
+                          : 'none',
                       willChange: 'transform, opacity',
                       transform: 'translateZ(0)',
                     }}
