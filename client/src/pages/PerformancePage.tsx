@@ -1,7 +1,7 @@
 import { Box, useTheme } from '@mui/material';
 
 import { tableauUserName } from '../config/tableau';
-import { ChatPanel } from '../features/chat/components/ChatPanel';
+import { ChatPanel } from '../features/chat/components/ChatPanelRefactored';
 import { ChatPreviewModal } from '../features/chat/components/ChatPreviewModal';
 import { useChat } from '../features/chat/hooks/useChat';
 import TableauDashboard from '../features/tableau/TableauDashboard';
@@ -71,6 +71,8 @@ const PerformancePage = () => {
           setInput={chatHook.setInput}
           onSend={chatHook.sendMessage}
           isLoading={chatHook.isLoading}
+          isCreatingReport={chatHook.isCreatingReport}
+          isCreatingChart={chatHook.isCreatingChart}
           onRequestPreview={chatHook.requestPreview}
           onRequestChart={chatHook.requestChart}
           preview={chatHook.preview}

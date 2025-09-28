@@ -2,8 +2,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import PreviewIcon from '@mui/icons-material/Preview';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { Avatar, Box, IconButton, Paper, Tooltip, Typography, useTheme } from '@mui/material';
-import React, { type FC } from 'react';
+import { Avatar, Box, CircularProgress, IconButton, Paper, Tooltip, Typography, useTheme } from '@mui/material';
+import { type FC } from 'react';
 
 import MarkdownRenderer from '../../../components/markdown/MarkdownRenderer';
 import { formatTimestamp } from '../../../utils/date';
@@ -14,12 +14,16 @@ interface ChatMessageProps {
   message: ChatMessageType;
   onRequestPreview: (message: ChatMessageType) => void;
   onRequestChart: (message: ChatMessageType) => void;
+  isCreatingReport?: boolean;
+  isCreatingChart?: boolean;
 }
 
 export const ChatMessage: FC<ChatMessageProps> = ({
   message,
   onRequestPreview,
   onRequestChart,
+  isCreatingReport = false,
+  isCreatingChart = false,
 }) => {
   const theme = useTheme();
   const styles = createMessageStyles(theme, message.sender === 'user');
@@ -115,79 +119,133 @@ export const ChatMessage: FC<ChatMessageProps> = ({
 
         {message.sender === 'bot' && (
           <Box sx={styles.actionButtons}>
-            <Tooltip
-              title={message.dashboardCode ? 'レポート再表示' : 'レポート作成'}
-              placement="top"
-              arrow
-            >
-              <IconButton
-                size="small"
-                onClick={() => onRequestPreview(message)}
-                sx={{
-                  color: message.dashboardCode ? '#10b981' : '#3b82f6',
-                  backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                  border: '1px solid',
-                  borderColor: message.dashboardCode ? '#10b981' : '#3b82f6',
-                  '&:hover': {
-                    backgroundColor: message.dashboardCode
-                      ? 'rgba(16, 185, 129, 0.1)'
-                      : 'rgba(59, 130, 246, 0.1)',
-                    borderColor: message.dashboardCode ? '#059669' : '#2563eb',
-                    transform: 'scale(1.05)',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Tooltip
+                title={message.dashboardCode ? 'レポート再表示' : 'レポート作成'}
+                placement="top"
+                arrow
               >
-                <PreviewIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
+                <IconButton
+                  size="small"
+                  onClick={() => onRequestPreview(message)}
+                  disabled={isCreatingReport}
+                  sx={{
+                    color: message.dashboardCode ? '#10b981' : '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    border: '1px solid',
+                    borderColor: message.dashboardCode ? '#10b981' : '#3b82f6',
+                    '&:hover': {
+                      backgroundColor: message.dashboardCode
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : 'rgba(59, 130, 246, 0.1)',
+                      borderColor: message.dashboardCode ? '#059669' : '#2563eb',
+                      transform: 'scale(1.05)',
+                    },
+                    '&:disabled': {
+                      backgroundColor: 'rgba(200, 200, 200, 0.1)',
+                      borderColor: '#d1d5db',
+                      color: '#9ca3af',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <PreviewIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
 
-            <Tooltip
-              title={
-                message.chartCode
-                  ? message.showChart
-                    ? 'チャート非表示'
-                    : 'チャート表示'
-                  : 'チャート作成'
-              }
-              placement="top"
-              arrow
-            >
-              <IconButton
-                size="small"
-                onClick={() => onRequestChart(message)}
-                sx={{
-                  color: message.chartCode
+              <Tooltip
+                title={
+                  message.chartCode
                     ? message.showChart
-                      ? '#f59e0b'
-                      : '#10b981'
-                    : '#8b5cf6',
-                  backgroundColor: 'rgba(139, 92, 246, 0.05)',
-                  border: '1px solid',
-                  borderColor: message.chartCode
-                    ? message.showChart
-                      ? '#f59e0b'
-                      : '#10b981'
-                    : '#8b5cf6',
-                  '&:hover': {
-                    backgroundColor: message.chartCode
+                      ? 'チャート非表示'
+                      : 'チャート表示'
+                    : 'チャート作成'
+                }
+                placement="top"
+                arrow
+              >
+                <IconButton
+                  size="small"
+                  onClick={() => onRequestChart(message)}
+                  disabled={isCreatingChart}
+                  sx={{
+                    color: message.chartCode
                       ? message.showChart
-                        ? 'rgba(245, 158, 11, 0.1)'
-                        : 'rgba(16, 185, 129, 0.1)'
-                      : 'rgba(139, 92, 246, 0.1)',
+                        ? '#f59e0b'
+                        : '#10b981'
+                      : '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.05)',
+                    border: '1px solid',
                     borderColor: message.chartCode
                       ? message.showChart
-                        ? '#d97706'
-                        : '#059669'
-                      : '#7c3aed',
-                    transform: 'scale(1.05)',
-                  },
-                  transition: 'all 0.2s ease',
+                        ? '#f59e0b'
+                        : '#10b981'
+                      : '#8b5cf6',
+                    '&:hover': {
+                      backgroundColor: message.chartCode
+                        ? message.showChart
+                          ? 'rgba(245, 158, 11, 0.1)'
+                          : 'rgba(16, 185, 129, 0.1)'
+                        : 'rgba(139, 92, 246, 0.1)',
+                      borderColor: message.chartCode
+                        ? message.showChart
+                          ? '#d97706'
+                          : '#059669'
+                        : '#7c3aed',
+                      transform: 'scale(1.05)',
+                    },
+                    '&:disabled': {
+                      backgroundColor: 'rgba(200, 200, 200, 0.1)',
+                      borderColor: '#d1d5db',
+                      color: '#9ca3af',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <ShowChartIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+
+            {/* ローディングステータス表示エリア */}
+            {(isCreatingReport || isCreatingChart) && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  mt: 1,
+                  px: 2,
+                  py: 1,
+                  backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  backdropFilter: 'blur(8px)',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)',
                 }}
               >
-                <ShowChartIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
+                <CircularProgress
+                  size={16}
+                  sx={{
+                    color: isCreatingReport ? '#3b82f6' : '#8b5cf6',
+                    filter: 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.3))',
+                  }}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: isCreatingReport ? '#3b82f6' : '#8b5cf6',
+                    fontWeight: 500,
+                    fontSize: '0.75rem',
+                    letterSpacing: '0.025em',
+                    textShadow: '0 0 8px rgba(59, 130, 246, 0.2)',
+                  }}
+                >
+                  {isCreatingReport ? 'レポート作成中...' : 'チャート作成中...'}
+                </Typography>
+              </Box>
+            )}
           </Box>
         )}
 

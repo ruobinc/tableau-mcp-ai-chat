@@ -49,6 +49,8 @@ export const useChat = () => {
     input: '',
     isChatOpen: false,
     isLoading: false,
+    isCreatingReport: false,
+    isCreatingChart: false,
     preview: {
       isOpen: false,
       code: null,
@@ -142,7 +144,7 @@ export const useChat = () => {
         return;
       }
 
-      setState((prev) => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isCreatingReport: true }));
 
       try {
         const response = await postJson<CreateReportResponse, CreateReportRequest>({
@@ -166,7 +168,7 @@ export const useChat = () => {
       } catch (error) {
         console.error('Report creation error:', error);
       } finally {
-        setState((prev) => ({ ...prev, isLoading: false }));
+        setState((prev) => ({ ...prev, isCreatingReport: false }));
       }
     },
     [updateMessage]
@@ -180,7 +182,7 @@ export const useChat = () => {
         return;
       }
 
-      setState((prev) => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isCreatingChart: true }));
 
       try {
         const response = await postJson<CreateChartResponse, CreateChartRequest>({
@@ -199,7 +201,7 @@ export const useChat = () => {
       } catch (error) {
         console.error('Chart creation error:', error);
       } finally {
-        setState((prev) => ({ ...prev, isLoading: false }));
+        setState((prev) => ({ ...prev, isCreatingChart: false }));
       }
     },
     [updateMessage]

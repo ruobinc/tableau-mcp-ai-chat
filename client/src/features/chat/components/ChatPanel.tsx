@@ -36,6 +36,8 @@ interface ChatPanelProps {
   setInput: (value: string) => void;
   onSend: (value: string) => Promise<void> | void;
   isLoading: boolean;
+  isCreatingReport: boolean;
+  isCreatingChart: boolean;
   onRequestPreview: (message: ChatMessage) => void;
   onRequestChart: (message: ChatMessage) => void;
   preview: ChatPreviewState;
@@ -61,6 +63,8 @@ export const ChatPanel: FC<ChatPanelProps> = ({
   setInput,
   onSend,
   isLoading,
+  isCreatingReport: _isCreatingReport,
+  isCreatingChart: _isCreatingChart,
   onRequestPreview,
   onRequestChart,
   preview,

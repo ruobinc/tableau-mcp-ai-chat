@@ -20,5 +20,7 @@ export interface ChatHookState {
   input: string;
   isChatOpen: boolean;
   isLoading: boolean;
+  isCreatingReport: boolean;
+  isCreatingChart: boolean;
   preview: ChatPreviewState;
 }
