@@ -248,9 +248,11 @@ class MCPService:
                 else:
                     # ツール使用なし、完了
                     process_query = False
+                    response_text = final_text[-1]
 
             self.logger.debug("Query processing result", extra={"response_length": len("\n".join(final_text))})
-            return "\n".join(final_text)
+            # return "\n".join(final_text)
+            return response_text
 
         except Exception as e:
             raise BedrockError(f"Query processing failed: {str(e)}")
