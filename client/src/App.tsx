@@ -1,20 +1,53 @@
-import { getSampleLinks } from './routes';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import Navigation from './components/navigation/Navigation';
+import { getMainRoutes } from './routes';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#3b82f6',
+    },
+    secondary: {
+      main: '#10b981',
+    },
+    background: {
+      default: '#ffffff',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#171717',
+      secondary: '#475569',
+    },
+  },
+  typography: {
+    fontFamily: "'Inter', 'Noto Sans JP', system-ui, sans-serif",
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+});
 
 function App() {
   return (
-    <>
-      <h1>@tableau/embedding-api-react samples</h1>
-      <div style={{ marginBottom: '2rem', padding: '1rem', backgroundColor: '#f0f8ff', borderRadius: '8px' }}>
-        <h2>Main Application Pages:</h2>
-        <ul>
-          <li><a href="/home">Home Page - メインランディングページ</a></li>
-          <li><a href="/performance">Performance Dashboard - ダッシュボード分析</a></li>
-          <li><a href="/pulse">Pulse Metrics - メトリクス監視</a></li>
-        </ul>
-      </div>
-      <h2>Embedding API Samples:</h2>
-      {getSampleLinks()}
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+          <Navigation />
+          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              {getMainRoutes()}
+              <Route path="*" element={<Navigate to="/home" replace />} />
+            </Routes>
+          </Box>
+        </Box>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

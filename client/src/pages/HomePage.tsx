@@ -16,16 +16,44 @@ const HomePage = () => {
   return (
     <Box
       sx={{
-        height: '100vh',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         overflow: 'hidden'
       }}
     >
-      {/* ヘッダースペース */}
-      <Box sx={{ height: '80px' }} />
+      <Box
+        component="video"
+        autoPlay
+        muted
+        loop
+        playsInline
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: -1,
+          filter: 'brightness(0.3) blur(1px)'
+        }}
+      >
+        <source src="/row.mp4" type="video/mp4" />
+      </Box>
+
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          zIndex: -1
+        }}
+      />
 
       <Box
         sx={{
@@ -51,7 +79,21 @@ const HomePage = () => {
             backdropFilter: 'blur(15px)',
             border: '1px solid rgba(255, 255, 255, 0.3)',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4, #10b981)',
+              animation: 'shimmer 3s linear infinite'
+            },
+            '@keyframes shimmer': {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            }
           }}
         >
           <Box
@@ -74,14 +116,48 @@ const HomePage = () => {
               }}
             />
 
-            <HomeIcon
+            <Box
               sx={{
-                fontSize: { xs: 56, sm: 72 },
-                color: '#3b82f6',
-                filter: 'drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3))',
-                mb: 2
+                display: 'inline-block',
+                position: 'relative'
               }}
-            />
+            >
+              <HomeIcon
+                sx={{
+                  fontSize: { xs: 56, sm: 72 },
+                  color: '#3b82f6',
+                  filter: 'drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3))',
+                  animation: 'float 3s ease-in-out infinite',
+                  '@keyframes float': {
+                    '0%, 100%': { transform: 'translateY(0px)' },
+                    '50%': { transform: 'translateY(-8px)' }
+                  }
+                }}
+              />
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: { xs: 80, sm: 100 },
+                  height: { xs: 80, sm: 100 },
+                  borderRadius: '50%',
+                  border: '2px solid rgba(59, 130, 246, 0.3)',
+                  animation: 'pulse 2s infinite',
+                  '@keyframes pulse': {
+                    '0%': {
+                      transform: 'translate(-50%, -50%) scale(1)',
+                      opacity: 1
+                    },
+                    '100%': {
+                      transform: 'translate(-50%, -50%) scale(1.3)',
+                      opacity: 0
+                    }
+                  }
+                }}
+              />
+            </Box>
           </Box>
 
           <Typography
@@ -151,11 +227,29 @@ const HomePage = () => {
                 background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%)',
                 borderRadius: 3,
                 border: '2px solid rgba(59, 130, 246, 0.2)',
+                backdropFilter: 'blur(10px)',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)'
+                  transform: 'translateY(-8px) scale(1.02)',
+                  boxShadow: '0 20px 40px rgba(59, 130, 246, 0.2)',
+                  borderColor: 'rgba(59, 130, 246, 0.4)',
+                  '& .arrow-icon': { transform: 'translateX(8px)' }
+                },
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                  transition: 'left 0.8s ease'
+                },
+                '&:hover::before': {
+                  left: '100%'
                 }
               }}
             >
@@ -166,7 +260,7 @@ const HomePage = () => {
                     color: '#3b82f6'
                   }}
                 />
-                <ArrowForwardIcon sx={{ fontSize: 24, color: '#3b82f6' }} />
+                <ArrowForwardIcon className="arrow-icon" sx={{ fontSize: 24, color: '#3b82f6', transition: 'transform 0.3s ease' }} />
               </Box>
               <Typography variant="h5" sx={{ color: '#1e40af', fontWeight: 700, mb: 1.5, fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
                 業績一覧
@@ -197,11 +291,29 @@ const HomePage = () => {
                 background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(167, 243, 208, 0.1) 100%)',
                 borderRadius: 3,
                 border: '2px solid rgba(16, 185, 129, 0.2)',
+                backdropFilter: 'blur(10px)',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 25px rgba(16, 185, 129, 0.15)'
+                  transform: 'translateY(-8px) scale(1.02)',
+                  boxShadow: '0 20px 40px rgba(16, 185, 129, 0.2)',
+                  borderColor: 'rgba(16, 185, 129, 0.4)',
+                  '& .arrow-icon': { transform: 'translateX(8px)' }
+                },
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                  transition: 'left 0.8s ease'
+                },
+                '&:hover::before': {
+                  left: '100%'
                 }
               }}
             >
@@ -212,7 +324,7 @@ const HomePage = () => {
                     color: '#10b981'
                   }}
                 />
-                <ArrowForwardIcon sx={{ fontSize: 24, color: '#10b981' }} />
+                <ArrowForwardIcon className="arrow-icon" sx={{ fontSize: 24, color: '#10b981', transition: 'transform 0.3s ease' }} />
               </Box>
               <Typography variant="h5" sx={{ color: '#047857', fontWeight: 700, mb: 1.5, fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
                 メトリクス

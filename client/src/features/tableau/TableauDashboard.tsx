@@ -102,18 +102,22 @@ const TableauDashboard: FC<TableauDashboardProps> = ({ username }) => {
       sx={{
         height: '100%',
         width: '100%',
+        minHeight: '600px',
         position: 'relative'
       }}
     >
       {jwtToken ? (
-        <TableauViz
-          src={tableauEmbeddedUrl}
-          token={jwtToken}
-          toolbar="hidden"
-          hideTabs
-          width="100%"
-          height="100%"
-        />
+        <div style={{ width: '100%', height: '100%', minHeight: '800px' }}>
+          <TableauViz
+            src={tableauEmbeddedUrl}
+            token={jwtToken}
+            toolbar="hidden"
+            hideTabs
+            width="100%"
+            height="800px"
+            device="desktop"
+          />
+        </div>
       ) : (
         <Box
           sx={{
