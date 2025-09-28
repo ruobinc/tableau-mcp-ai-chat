@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { apiEndpoints } from '../../../config/api';
 import { postJson } from '../../../lib/http';
@@ -57,6 +57,9 @@ export const useChat = () => {
     },
   });
 
+  // AbortControllerでリクエストキャンセル機能を追加
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     setState((prev) => ({
       ...prev,
@@ -74,6 +77,14 @@ export const useChat = () => {
   const sendMessage = useCallback(
     async (message: string) => {
       if (!message.trim() || state.isLoading) return;
+
+      // 前のリクエストをキャンセル
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // 新しいAbortControllerを作成
+      abortControllerRef.current = new AbortController();
 
       addMessage({
         text: message,
@@ -106,11 +117,19 @@ export const useChat = () => {
           },
         });
 
-        addMessage({
-          text: response.message,
-          sender: 'bot',
-        });
+        // キャンセルされていない場合のみレスポンスを処理
+        if (!abortControllerRef.current?.signal.aborted) {
+          addMessage({
+            text: response.message,
+            sender: 'bot',
+          });
+        }
       } catch (error) {
+        // AbortErrorの場合は何もしない
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
         console.error('Chat error:', error);
         addMessage({
           text: 'エラーが発生しました。しばらく待ってから再試行してください。',
@@ -118,6 +137,7 @@ export const useChat = () => {
         });
       } finally {
         setState((prev) => ({ ...prev, isLoading: false }));
+        abortControllerRef.current = null;
       }
     },
     [state.isLoading, state.messages, addMessage]
@@ -229,6 +249,14 @@ export const useChat = () => {
     }));
   }, []);
 
+  // キャンセル機能を追加
+  const cancelMessage = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setState((prev) => ({ ...prev, isLoading: false }));
+    }
+  }, []);
+
   return {
     ...state,
     sendMessage,
@@ -239,5 +267,6 @@ export const useChat = () => {
     toggleChat,
     closePreview,
     openPreview,
+    cancelMessage,
   };
 };

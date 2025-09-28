@@ -2,7 +2,16 @@ import PersonIcon from '@mui/icons-material/Person';
 import PreviewIcon from '@mui/icons-material/Preview';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import { Avatar, Box, CircularProgress, IconButton, Paper, Tooltip, Typography, useTheme } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { type FC } from 'react';
 
 import MarkdownRenderer from '../../../components/markdown/MarkdownRenderer';

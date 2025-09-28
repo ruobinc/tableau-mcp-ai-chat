@@ -24,6 +24,7 @@ import { createChatPanelStyles } from '../styles/chatStyles';
 import type { ChatMessage, ChatPreviewState } from '../types';
 import { ChatMessage as ChatMessageComponent } from './ChatMessage';
 import { ChatPreviewModal } from './ChatPreviewModal';
+import { LoadingIndicator } from './LoadingIndicator';
 
 interface ChatPanelProps {
   messages: ChatMessage[];
@@ -39,6 +40,7 @@ interface ChatPanelProps {
   onRequestChart: (message: ChatMessage) => void;
   preview: ChatPreviewState;
   onClosePreview: () => void;
+  onCancelMessage?: () => void;
 }
 
 const EmptyState: FC = () => {
@@ -81,9 +83,11 @@ const EmptyState: FC = () => {
   );
 };
 
-const LoadingMessage: FC = () => {
-  const theme = useTheme();
+interface LoadingMessageProps {
+  onCancel?: () => void;
+}
 
+const LoadingMessage: FC<LoadingMessageProps> = ({ onCancel }) => {
   return (
     <Box
       sx={{
@@ -110,53 +114,7 @@ const LoadingMessage: FC = () => {
       </Box>
 
       <Box sx={{ maxWidth: '95%', display: 'flex', flexDirection: 'column' }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            borderRadius: '20px 20px 20px 6px',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(248, 250, 252, 0.8)',
-            color: theme.palette.text.primary,
-            border: `1px solid ${theme.palette.divider}`,
-            backdropFilter: 'blur(10px)',
-            position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '2px',
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              opacity: 0.7,
-              transition: 'opacity 0.3s ease',
-            },
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <CircularProgress
-              size={20}
-              sx={{
-                color: theme.palette.primary.main,
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}
-            />
-            <Typography
-              variant="body1"
-              sx={{
-                lineHeight: 1.5,
-                fontSize: '1rem',
-                color: theme.palette.text.secondary,
-                fontStyle: 'italic',
-                fontWeight: 500,
-              }}
-            >
-              AI が回答を生成中...
-            </Typography>
-          </Box>
-        </Paper>
+        <LoadingIndicator isVisible={true} onCancel={onCancel} />
       </Box>
     </Box>
   );
@@ -176,6 +134,7 @@ export const ChatPanel: FC<ChatPanelProps> = ({
   onRequestChart,
   preview,
   onClosePreview,
+  onCancelMessage,
 }) => {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
@@ -239,7 +198,7 @@ export const ChatPanel: FC<ChatPanelProps> = ({
                     isCreatingChart={isCreatingChart}
                   />
                 ))}
-                {isLoading && <LoadingMessage />}
+                {isLoading && <LoadingMessage onCancel={onCancelMessage} />}
               </>
             )}
             <div ref={chatEndRef} />

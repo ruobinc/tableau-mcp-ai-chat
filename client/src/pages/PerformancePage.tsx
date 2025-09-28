@@ -77,6 +77,7 @@ const PerformancePage = () => {
           onRequestChart={chatHook.requestChart}
           preview={chatHook.preview}
           onClosePreview={chatHook.closePreview}
+          onCancelMessage={chatHook.cancelMessage}
         />
 
         {/* チャットプレビューモーダル */}
