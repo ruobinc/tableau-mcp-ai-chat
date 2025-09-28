@@ -14,7 +14,7 @@ const PerformancePage = () => {
     <JWTProvider defaultUsername={tableauUserName || 'default-user'} prefetchDefaultToken>
       <Box
         sx={{
-          height: 'calc(100vh - 64px)', // Navigation height を差し引く
+          height: '100%',
           display: 'flex',
           overflow: 'hidden',
           position: 'relative',
@@ -36,8 +36,6 @@ const PerformancePage = () => {
               flexGrow: 1,
               backgroundColor: '#ffffff',
               position: 'relative',
-              height: 'calc(100vh - 64px)',
-              minHeight: '800px'
             }}
           >
             <TableauDashboard username={tableauUserName} />
