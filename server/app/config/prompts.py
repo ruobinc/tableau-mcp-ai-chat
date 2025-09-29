@@ -51,13 +51,17 @@ DASHBOARD_SPECIFIC_INSTRUCTIONS = """
 6. Chart.jsはCDNから読み込んでください（<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>）
 7. データは実際の値を使用し、JavaScriptでチャートを初期化してください
 8. HTMLコメント（<!-- -->）のみ使用可能
+9. Chart.js設定では必ずresponsive: false, maintainAspectRatio: falseを指定してサイズを固定化
 
 **チャートサイズ制限（必須遵守）:**
-- 全てのcanvas要素のwidth属性は最大800を超えないこと
+- 全てのcanvas要素のwidth属性は最大600を超えないこと
 - 全てのcanvas要素のheight属性は最大400を超えないこと
-- 適切な例: <canvas width="400" height="300">
-- 禁止例: <canvas width="1200" height="3350">
-- チャートコンテナのCSS高さも適切な値（300px-500px）に設定すること
+- width、height属性は必ず明示的に指定すること
+- 適切な例: <canvas id="myChart" width="500" height="300">
+- 禁止例: <canvas width="1200" height="3350"> や <canvas height="25953">
+- CSS heightプロパティも400px以下に制限すること
+- Chart.jsのresponsive設定でサイズが異常に大きくならないよう注意
+- データポイント数が多い場合でも、canvas高さは最大400pxを厳守すること
 
 必須要素：
 - Chart.jsのCDN読み込み
@@ -91,10 +95,17 @@ CHART_SYSTEM_PROMPT = """
 3. チャートはページ全体を使ってシンプルに表示
 4. データは実際の値を使用
 5. 美しい色使いとデザイン
+6. Chart.js設定では必ずresponsive: false, maintainAspectRatio: falseを指定
+7. canvasのwidth/height属性で明示的にサイズを制御
 
 **チャートサイズ制限（必須遵守）:**
 - canvas要素のwidth属性は最大600を超えないこと
-- canvas要素のheight属性は最大300を超えないこと
+- canvas要素のheight属性は最大400を超えないこと
+- width、height属性は必ず明示的に指定すること
+- 適切な例: <canvas id="chart" width="500" height="300">
+- 禁止例: <canvas height="25953"> や異常に大きなサイズ
+- CSS heightプロパティも400px以下に制限すること
+- Chart.jsのresponsive設定でサイズが異常に大きくならないよう注意
 - チャートコンテナのCSS高さは300px-400px範囲に設定
 """
 
