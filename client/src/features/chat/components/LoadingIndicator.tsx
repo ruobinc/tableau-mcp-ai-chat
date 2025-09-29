@@ -182,7 +182,7 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = React.memo(
 
             {/* 思考プロセス表示 */}
             <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              {['データ分析', '思考整理', '回答生成'].map((step, index) => (
+              {['質問分析', '思考整理', '回答生成'].map((step, index) => (
                 <Box
                   key={step}
                   sx={{

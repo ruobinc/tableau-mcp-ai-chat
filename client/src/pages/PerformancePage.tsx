@@ -37,6 +37,7 @@ const PerformancePage = () => {
           preview={chatHook.preview}
           onClosePreview={chatHook.closePreview}
           onCancelMessage={chatHook.cancelMessage}
+          onClearMessages={chatHook.clearMessages}
         />
 
         {/* チャットプレビューモーダル */}

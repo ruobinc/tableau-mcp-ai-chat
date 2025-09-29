@@ -1,11 +1,17 @@
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Fab,
   IconButton,
@@ -17,7 +23,7 @@ import {
   useTheme,
   Zoom,
 } from '@mui/material';
-import React, { type FC, useCallback, useEffect, useRef } from 'react';
+import React, { type FC, useCallback, useEffect, useRef, useState } from 'react';
 
 import { CHAT_CONFIG } from '../../../config/constants';
 import { createChatPanelStyles } from '../styles/chatStyles';
@@ -41,6 +47,7 @@ interface ChatPanelProps {
   preview: ChatPreviewState;
   onClosePreview: () => void;
   onCancelMessage?: () => void;
+  onClearMessages?: () => void;
 }
 
 const EmptyState: FC = () => {
@@ -135,10 +142,12 @@ export const ChatPanel: FC<ChatPanelProps> = ({
   preview,
   onClosePreview,
   onCancelMessage,
+  onClearMessages,
 }) => {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
   const styles = createChatPanelStyles(theme);
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: CHAT_CONFIG.AUTO_SCROLL_BEHAVIOR });
@@ -161,6 +170,19 @@ export const ChatPanel: FC<ChatPanelProps> = ({
     [handleSubmit]
   );
 
+  const handleClearClick = useCallback(() => {
+    setClearDialogOpen(true);
+  }, []);
+
+  const handleClearConfirm = useCallback(() => {
+    onClearMessages?.();
+    setClearDialogOpen(false);
+  }, [onClearMessages]);
+
+  const handleClearCancel = useCallback(() => {
+    setClearDialogOpen(false);
+  }, []);
+
   return (
     <>
       <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
@@ -173,6 +195,13 @@ export const ChatPanel: FC<ChatPanelProps> = ({
               <Typography variant="h6" sx={styles.headerTitle}>
                 AI 分析アシスタント
               </Typography>
+              {messages.length > 0 && (
+                <Tooltip title="履歴をクリア" arrow>
+                  <IconButton size="small" onClick={handleClearClick} sx={styles.closeButton}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
               <Tooltip title="チャットを閉じる" arrow>
                 <IconButton size="small" onClick={onToggle} sx={styles.closeButton}>
                   <CloseIcon fontSize="small" />
@@ -244,6 +273,29 @@ export const ChatPanel: FC<ChatPanelProps> = ({
           </Fab>
         </Zoom>
       )}
+
+      {/* 履歴クリア確認ダイアログ */}
+      <Dialog
+        open={clearDialogOpen}
+        onClose={handleClearCancel}
+        aria-labelledby="clear-dialog-title"
+        aria-describedby="clear-dialog-description"
+      >
+        <DialogTitle id="clear-dialog-title">チャット履歴をクリア</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="clear-dialog-description">
+            すべてのチャット履歴が削除されます。この操作は元に戻せません。本当に実行しますか？
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClearCancel} color="primary">
+            キャンセル
+          </Button>
+          <Button onClick={handleClearConfirm} color="error" variant="contained">
+            削除
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

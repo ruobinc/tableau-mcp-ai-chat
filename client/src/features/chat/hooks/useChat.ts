@@ -257,6 +257,11 @@ export const useChat = () => {
     }
   }, []);
 
+  // チャット履歴をクリアする機能を追加
+  const clearMessages = useCallback(() => {
+    setState((prev) => ({ ...prev, messages: [] }));
+  }, []);
+
   return {
     ...state,
     sendMessage,
@@ -268,5 +273,6 @@ export const useChat = () => {
     closePreview,
     openPreview,
     cancelMessage,
+    clearMessages,
   };
 };
