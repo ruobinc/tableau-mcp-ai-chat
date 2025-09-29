@@ -165,17 +165,6 @@ export const createPageStyles = (theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     overflow: 'hidden',
     position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '2px',
-      background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-      opacity: 0.7,
-      zIndex: 1,
-    },
   } as const,
 
   dashboardContainer: {
