@@ -53,12 +53,14 @@ export const useChat = () => {
     isCreatingChart: false,
     preview: {
       isOpen: false,
-      code: null,
+      messageId: null,
     },
   });
 
   // AbortControllerでリクエストキャンセル機能を追加
   const abortControllerRef = useRef<AbortController | null>(null);
+  const previewCacheRef = useRef<Map<number, string>>(new Map());
+  const chartCacheRef = useRef<Map<number, string>>(new Map());
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     setState((prev) => ({
@@ -152,13 +154,13 @@ export const useChat = () => {
 
   const requestPreview = useCallback(
     async (message: ChatMessage) => {
-      if (message.dashboardCode) {
-        // 既にダッシュボードコードがある場合は再利用
+      const cachedCode = previewCacheRef.current.get(message.id);
+      if (cachedCode) {
         setState((prev) => ({
           ...prev,
           preview: {
             isOpen: true,
-            code: message.dashboardCode || null,
+            messageId: message.id,
           },
         }));
         return;
@@ -175,29 +177,28 @@ export const useChat = () => {
           },
         });
 
-        // メッセージにダッシュボードコードを保存
-        updateMessage(message.id, { dashboardCode: response.code });
-
         setState((prev) => ({
           ...prev,
           preview: {
             isOpen: true,
-            code: response.code,
+            messageId: message.id,
           },
         }));
+        previewCacheRef.current.set(message.id, response.code);
       } catch (error) {
         console.error('Report creation error:', error);
       } finally {
         setState((prev) => ({ ...prev, isCreatingReport: false }));
       }
     },
-    [updateMessage]
+    []
   );
 
   const requestChart = useCallback(
     async (message: ChatMessage) => {
-      if (message.chartCode) {
-        // 既にチャートコードがある場合は表示状態をトグル
+      const cachedCode = chartCacheRef.current.get(message.id);
+      if (cachedCode) {
+        // 既にチャートがある場合は表示状態をトグル
         updateMessage(message.id, { showChart: !message.showChart });
         return;
       }
@@ -213,9 +214,10 @@ export const useChat = () => {
           },
         });
 
-        // メッセージにチャートコードを保存し、表示状態をONに
+        chartCacheRef.current.set(message.id, response.code);
+
+        // メッセージ表示状態をONに
         updateMessage(message.id, {
-          chartCode: response.code,
           showChart: true,
         });
       } catch (error) {
@@ -236,16 +238,26 @@ export const useChat = () => {
   }, []);
 
   const closePreview = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      preview: { isOpen: false, code: null },
-    }));
+    setState((prev) => {
+      if (prev.preview.messageId !== null) {
+        previewCacheRef.current.delete(prev.preview.messageId);
+      }
+
+      return {
+        ...prev,
+        preview: { isOpen: false, messageId: null },
+      };
+    });
   }, []);
 
-  const openPreview = useCallback((code: string) => {
+  const openPreview = useCallback((messageId: number) => {
+    if (!previewCacheRef.current.has(messageId)) {
+      return;
+    }
+
     setState((prev) => ({
       ...prev,
-      preview: { isOpen: true, code },
+      preview: { isOpen: true, messageId },
     }));
   }, []);
 
@@ -259,7 +271,20 @@ export const useChat = () => {
 
   // チャット履歴をクリアする機能を追加
   const clearMessages = useCallback(() => {
+    previewCacheRef.current.clear();
+    chartCacheRef.current.clear();
     setState((prev) => ({ ...prev, messages: [] }));
+  }, []);
+
+  const getPreviewContent = useCallback((messageId: number | null) => {
+    if (messageId == null) {
+      return undefined;
+    }
+    return previewCacheRef.current.get(messageId);
+  }, []);
+
+  const getChartContent = useCallback((messageId: number) => {
+    return chartCacheRef.current.get(messageId);
   }, []);
 
   return {
@@ -274,5 +299,7 @@ export const useChat = () => {
     openPreview,
     cancelMessage,
     clearMessages,
+    getPreviewContent,
+    getChartContent,
   };
 };

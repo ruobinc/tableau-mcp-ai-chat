@@ -48,6 +48,8 @@ interface ChatPanelProps {
   onClosePreview: () => void;
   onCancelMessage?: () => void;
   onClearMessages?: () => void;
+  getPreviewContent: (messageId: number | null) => string | undefined;
+  getChartContent: (messageId: number) => string | undefined;
 }
 
 const EmptyState: FC = () => {
@@ -143,6 +145,8 @@ export const ChatPanel: FC<ChatPanelProps> = ({
   onClosePreview,
   onCancelMessage,
   onClearMessages,
+  getPreviewContent,
+  getChartContent,
 }) => {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
@@ -210,7 +214,11 @@ export const ChatPanel: FC<ChatPanelProps> = ({
             </Box>
           </Paper>
 
-          <ChatPreviewModal open={preview.isOpen} code={preview.code} onClose={onClosePreview} />
+          <ChatPreviewModal
+            open={preview.isOpen}
+            code={getPreviewContent(preview.messageId) ?? null}
+            onClose={onClosePreview}
+          />
 
           <Box sx={styles.messagesContainer}>
             {messages.length === 0 ? (
@@ -225,6 +233,8 @@ export const ChatPanel: FC<ChatPanelProps> = ({
                     onRequestChart={onRequestChart}
                     isCreatingReport={isCreatingReport}
                     isCreatingChart={isCreatingChart}
+                    previewAvailable={Boolean(getPreviewContent(msg.id))}
+                    chartCode={getChartContent(msg.id) ?? null}
                   />
                 ))}
                 {isLoading && <LoadingMessage onCancel={onCancelMessage} />}

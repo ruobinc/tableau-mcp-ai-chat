@@ -5,14 +5,12 @@ export interface ChatMessage {
   text: string;
   sender: ChatSender;
   timestamp: string;
-  dashboardCode?: string;
-  chartCode?: string;
   showChart?: boolean;
 }
 
 export interface ChatPreviewState {
   isOpen: boolean;
-  code: string | null;
+  messageId: number | null;
 }
 
 export interface ChatHookState {
