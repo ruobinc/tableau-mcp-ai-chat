@@ -1,7 +1,7 @@
 import { Box, useTheme } from '@mui/material';
 
 import { tableauUserName } from '../config/tableau';
-import { ChatPanel, ChatPreviewModal } from '../features/chat/components';
+import { ChatPanel } from '../features/chat/components';
 import { useChat } from '../features/chat/hooks/useChat';
 import { TableauDashboard } from '../features/tableau/components';
 import { JWTPageWrapper } from './components';
@@ -40,12 +40,6 @@ const PerformancePage = () => {
           onClearMessages={chatHook.clearMessages}
         />
 
-        {/* チャットプレビューモーダル */}
-        <ChatPreviewModal
-          open={chatHook.preview.isOpen}
-          code={chatHook.preview.code}
-          onClose={chatHook.closePreview}
-        />
       </Box>
     </JWTPageWrapper>
   );
