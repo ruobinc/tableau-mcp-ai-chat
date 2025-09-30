@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { apiEndpoints } from '../../../config/api';
+import { CHAT_CONFIG } from '../../../config/constants';
 import { postJson } from '../../../lib/http';
 import { generateId, generateTimestamp } from '../../../utils/date';
 import { ChatHookState, ChatMessage } from '../types';
@@ -43,6 +44,15 @@ interface CreateChartResponse {
   success: boolean;
 }
 
+const trimMessages = (messages: ChatMessage[]): ChatMessage[] => {
+  const limit = CHAT_CONFIG.MAX_HISTORY_SIZE;
+  if (!limit || messages.length <= limit) {
+    return messages;
+  }
+
+  return messages.slice(-limit);
+};
+
 export const useChat = () => {
   const [state, setState] = useState<ChatHookState>({
     messages: [],
@@ -61,17 +71,21 @@ export const useChat = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
-    setState((prev) => ({
-      ...prev,
-      messages: [
+    setState((prev) => {
+      const nextMessages = [
         ...prev.messages,
         {
           ...message,
           id: generateId(),
           timestamp: generateTimestamp(),
         },
-      ],
-    }));
+      ];
+
+      return {
+        ...prev,
+        messages: trimMessages(nextMessages),
+      };
+    });
   }, []);
 
   const sendMessage = useCallback(
@@ -98,8 +112,12 @@ export const useChat = () => {
 
       try {
         // メッセージ履歴を構築（最新のユーザーメッセージを含む）
+        const historyLimit = Math.max((CHAT_CONFIG.API_HISTORY_LIMIT || 0) - 1, 0);
+        const recentMessages =
+          historyLimit > 0 ? state.messages.slice(-historyLimit) : state.messages;
+
         const allMessages: ApiChatMessage[] = [
-          ...state.messages.map((msg) => ({
+          ...recentMessages.map((msg) => ({
             role: msg.sender === 'user' ? 'user' : 'assistant',
             content: msg.text,
           })),
@@ -115,6 +133,7 @@ export const useChat = () => {
             messages: allMessages,
             timestamp: generateTimestamp(),
           },
+          signal: abortControllerRef.current?.signal,
         });
 
         // キャンセルされていない場合のみレスポンスを処理
@@ -253,6 +272,7 @@ export const useChat = () => {
   const cancelMessage = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      abortControllerRef.current = null;
       setState((prev) => ({ ...prev, isLoading: false }));
     }
   }, []);
@@ -260,6 +280,13 @@ export const useChat = () => {
   // チャット履歴をクリアする機能を追加
   const clearMessages = useCallback(() => {
     setState((prev) => ({ ...prev, messages: [] }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+    };
   }, []);
 
   return {
