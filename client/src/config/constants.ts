@@ -46,6 +46,8 @@ export const THEME_CONFIG = {
 export const CHAT_CONFIG = {
   MAX_MESSAGE_LENGTH: 2000,
   MAX_HISTORY_SIZE: 100,
+  MAX_RENDERED_MESSAGES: 50,
+  API_HISTORY_LIMIT: 20,
   TYPING_DELAY: 1000,
   AUTO_SCROLL_BEHAVIOR: 'smooth' as ScrollBehavior,
   PLACEHOLDER_TEXT: 'データについて質問してください... (⌘+Enter で送信)',
