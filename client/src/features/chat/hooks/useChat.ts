@@ -44,15 +44,6 @@ interface CreateChartResponse {
   success: boolean;
 }
 
-const trimMessages = (messages: ChatMessage[]): ChatMessage[] => {
-  const limit = CHAT_CONFIG.MAX_HISTORY_SIZE;
-  if (!limit || messages.length <= limit) {
-    return messages;
-  }
-
-  return messages.slice(-limit);
-};
-
 export const useChat = () => {
   const [state, setState] = useState<ChatHookState>({
     messages: [],
