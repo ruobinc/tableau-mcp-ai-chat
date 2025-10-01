@@ -23,7 +23,7 @@ import {
   useTheme,
   Zoom,
 } from '@mui/material';
-import React, { type FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CHAT_CONFIG } from '../../../config/constants';
 import { createChatPanelStyles } from '../styles/chatStyles';
@@ -150,12 +150,24 @@ export const ChatPanel: FC<ChatPanelProps> = ({
 }) => {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
-  const styles = createChatPanelStyles(theme);
+  const styles = useMemo(() => createChatPanelStyles(theme), [theme]);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
+
+  const visibleMessages = useMemo(() => {
+    const limit = CHAT_CONFIG.MAX_RENDERED_MESSAGES || CHAT_CONFIG.MAX_HISTORY_SIZE;
+    if (!limit || messages.length <= limit) {
+      return messages;
+    }
+
+    return messages.slice(-limit);
+  }, [messages]);
+
+  const hasHiddenHistory = messages.length > visibleMessages.length;
+  const hiddenCount = hasHiddenHistory ? messages.length - visibleMessages.length : 0;
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: CHAT_CONFIG.AUTO_SCROLL_BEHAVIOR });
-  }, [messages, isLoading]);
+  }, [visibleMessages, isLoading]);
 
   const handleSubmit = useCallback(() => {
     if (input.trim()) {
@@ -221,11 +233,21 @@ export const ChatPanel: FC<ChatPanelProps> = ({
           />
 
           <Box sx={styles.messagesContainer}>
-            {messages.length === 0 ? (
+            {hasHiddenHistory && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', textAlign: 'center', mb: 2 }}
+              >
+                最新 {visibleMessages.length} 件のメッセージを表示中。過去 {hiddenCount} 件は自動的に折りたたまれています。
+              </Typography>
+            )}
+
+            {visibleMessages.length === 0 ? (
               <EmptyState />
             ) : (
               <>
-                {messages.map((msg) => (
+                {visibleMessages.map((msg) => (
                   <ChatMessageComponent
                     key={msg.id}
                     message={msg}

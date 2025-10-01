@@ -12,7 +12,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { type FC } from 'react';
+import { type FC, memo, useMemo } from 'react';
 
 import MarkdownRenderer from '../../../components/markdown/MarkdownRenderer';
 import { formatTimestamp } from '../../../utils/date';
@@ -29,7 +29,7 @@ interface ChatMessageProps {
   chartCode?: string | null;
 }
 
-export const ChatMessage: FC<ChatMessageProps> = ({
+const ChatMessageComponent: FC<ChatMessageProps> = ({
   message,
   onRequestPreview,
   onRequestChart,
@@ -39,7 +39,10 @@ export const ChatMessage: FC<ChatMessageProps> = ({
   chartCode,
 }) => {
   const theme = useTheme();
-  const styles = createMessageStyles(theme, message.sender === 'user');
+  const styles = useMemo(() => createMessageStyles(theme, message.sender === 'user'), [
+    theme,
+    message.sender,
+  ]);
 
   return (
     <Box sx={styles.container}>
@@ -304,3 +307,5 @@ export const ChatMessage: FC<ChatMessageProps> = ({
     </Box>
   );
 };
+
+export const ChatMessage = memo(ChatMessageComponent);
