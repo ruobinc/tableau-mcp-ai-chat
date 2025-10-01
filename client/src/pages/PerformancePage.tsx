@@ -1,7 +1,7 @@
 import { Box, useTheme } from '@mui/material';
 
 import { tableauUserName } from '../config/tableau';
-import { ChatPanel } from '../features/chat/components';
+import { ChatPanel, ChatPreviewModal } from '../features/chat/components';
 import { useChat } from '../features/chat/hooks/useChat';
 import { TableauDashboard } from '../features/tableau/components';
 import { JWTPageWrapper } from './components';
