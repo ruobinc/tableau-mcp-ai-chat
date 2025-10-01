@@ -38,8 +38,16 @@ const PerformancePage = () => {
           onClosePreview={chatHook.closePreview}
           onCancelMessage={chatHook.cancelMessage}
           onClearMessages={chatHook.clearMessages}
+          getPreviewContent={chatHook.getPreviewContent}
+          getChartContent={chatHook.getChartContent}
         />
 
+        {/* チャットプレビューモーダル */}
+        <ChatPreviewModal
+          open={chatHook.preview.isOpen}
+          code={chatHook.getPreviewContent(chatHook.preview.messageId) ?? null}
+          onClose={chatHook.closePreview}
+        />
       </Box>
     </JWTPageWrapper>
   );
