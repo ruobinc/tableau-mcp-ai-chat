@@ -68,8 +68,8 @@ class Settings(BaseModel):
         super().__init__(
             aws=AWSSettings(
                 region=os.getenv("AWS_REGION", "ap-northeast-1"),
-                access_key=os.getenv("AWS_ACCESS_KEY"),
-                secret_key=os.getenv("AWS_SECRET_KEY"),
+                access_key=os.getenv("AWS_ACCESS_KEY_ID"),
+                secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
                 session_token=os.getenv("AWS_SESSION_TOKEN")
             ),
             bedrock=BedrockSettings(
