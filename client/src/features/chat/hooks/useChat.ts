@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { apiEndpoints } from '../../../config/api';
+import { CHAT_CONFIG } from '../../../config/constants';
 import { postJson } from '../../../lib/http';
 import { generateId, generateTimestamp } from '../../../utils/date';
 import { ChatHookState, ChatMessage } from '../types';
@@ -63,17 +64,41 @@ export const useChat = () => {
   const chartCacheRef = useRef<Map<number, string>>(new Map());
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
-    setState((prev) => ({
-      ...prev,
-      messages: [
-        ...prev.messages,
-        {
-          ...message,
-          id: generateId(),
-          timestamp: generateTimestamp(),
-        },
-      ],
-    }));
+    setState((prev) => {
+      const nextMessage: ChatMessage = {
+        ...message,
+        id: generateId(),
+        timestamp: generateTimestamp(),
+      };
+
+      const appendedMessages = [...prev.messages, nextMessage];
+
+      if (appendedMessages.length <= CHAT_CONFIG.MAX_HISTORY_SIZE) {
+        return {
+          ...prev,
+          messages: appendedMessages,
+        };
+      }
+
+      const excessCount = appendedMessages.length - CHAT_CONFIG.MAX_HISTORY_SIZE;
+      const removedMessages = appendedMessages.slice(0, excessCount);
+      const remainingMessages = appendedMessages.slice(excessCount);
+
+      removedMessages.forEach((removedMessage) => {
+        previewCacheRef.current.delete(removedMessage.id);
+        chartCacheRef.current.delete(removedMessage.id);
+      });
+
+      const shouldClosePreview = removedMessages.some(
+        (removedMessage) => removedMessage.id === prev.preview.messageId
+      );
+
+      return {
+        ...prev,
+        messages: remainingMessages,
+        preview: shouldClosePreview ? { isOpen: false, messageId: null } : prev.preview,
+      };
+    });
   }, []);
 
   const sendMessage = useCallback(
@@ -273,7 +298,11 @@ export const useChat = () => {
   const clearMessages = useCallback(() => {
     previewCacheRef.current.clear();
     chartCacheRef.current.clear();
-    setState((prev) => ({ ...prev, messages: [] }));
+    setState((prev) => ({
+      ...prev,
+      messages: [],
+      preview: { isOpen: false, messageId: null },
+    }));
   }, []);
 
   const getPreviewContent = useCallback((messageId: number | null) => {
