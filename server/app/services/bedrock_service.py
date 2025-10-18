@@ -114,8 +114,12 @@ class BedrockService:
         }
 
         if tools:
-            payload["tools"] = tools
-            self.logger.debug(f"Using {len(tools)} tools", extra={"tool_count": len(tools)})
+            serialized_tools = [self._serialize_tool(tool) for tool in tools]
+            payload["tools"] = serialized_tools
+            self.logger.debug(
+                f"Using {len(serialized_tools)} tools",
+                extra={"tool_count": len(serialized_tools)}
+            )
 
         if system:
             payload["system"] = system
@@ -154,6 +158,74 @@ class BedrockService:
             return data
 
         return block
+
+    def _serialize_tool(self, tool: Any) -> Dict[str, Any]:
+        if hasattr(tool, "model_dump"):
+            return self._serialize_tool(tool.model_dump())
+
+        if hasattr(tool, "to_dict"):
+            return self._serialize_tool(tool.to_dict())
+
+        if hasattr(tool, "__dict__") and not isinstance(tool, dict):
+            data = {
+                key: value
+                for key, value in tool.__dict__.items()
+                if not key.startswith("_")
+            }
+            return self._serialize_tool(data)
+
+        if isinstance(tool, dict):
+            serialized: Dict[str, Any] = {}
+            for key, value in tool.items():
+                if key == "input_schema":
+                    serialized[key] = self._serialize_schema(value)
+                else:
+                    serialized[key] = self._serialize_generic(value)
+            return serialized
+
+        return {
+            "name": getattr(tool, "name", ""),
+            "description": getattr(tool, "description", ""),
+            "input_schema": self._serialize_schema(getattr(tool, "input_schema", {})),
+        }
+
+    def _serialize_schema(self, schema: Any) -> Any:
+        if hasattr(schema, "model_dump"):
+            return schema.model_dump()
+
+        if hasattr(schema, "to_dict"):
+            return schema.to_dict()
+
+        if hasattr(schema, "__dict__") and not isinstance(schema, dict):
+            return {
+                key: value
+                for key, value in schema.__dict__.items()
+                if not key.startswith("_")
+            }
+
+        return schema
+
+    def _serialize_generic(self, value: Any) -> Any:
+        if isinstance(value, list):
+            return [self._serialize_generic(item) for item in value]
+
+        if isinstance(value, dict):
+            return {k: self._serialize_generic(v) for k, v in value.items()}
+
+        if hasattr(value, "model_dump"):
+            return value.model_dump()
+
+        if hasattr(value, "to_dict"):
+            return value.to_dict()
+
+        if hasattr(value, "__dict__") and not isinstance(value, dict):
+            return {
+                key: self._serialize_generic(val)
+                for key, val in value.__dict__.items()
+                if not key.startswith("_")
+            }
+
+        return value
 
     def _parse_response(self, response: Dict[str, Any]) -> BedrockResponse:
         body_bytes = response.get("body")

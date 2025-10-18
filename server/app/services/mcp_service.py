@@ -1,6 +1,7 @@
-from typing import Optional, Dict, Any, List
-from contextlib import AsyncExitStack
+import json
 import time
+from contextlib import AsyncExitStack
+from typing import Optional, Dict, Any, List
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -222,16 +223,29 @@ class MCPService:
                     for content in tool_use_blocks:
                         try:
                             result = await self.call_tool(content.name, content.input)
-                            tool_results.append({
+                            tool_result_content = self._prepare_tool_result_content(result)
+                            tool_result_payload = {
                                 "type": "tool_result",
                                 "tool_use_id": content.id,
-                                "content": result.content if hasattr(result, 'content') else str(result),
-                            })
+                                "content": tool_result_content,
+                            }
+
+                            is_error = self._extract_is_error_flag(result)
+                            if is_error:
+                                tool_result_payload["is_error"] = True
+
+                            tool_results.append(tool_result_payload)
                         except Exception as e:
                             tool_results.append({
                                 "type": "tool_result",
                                 "tool_use_id": content.id,
-                                "content": f"ツールの実行でエラーが発生しました: {str(e)}",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": f"ツールの実行でエラーが発生しました: {str(e)}"
+                                    }
+                                ],
+                                "is_error": True,
                             })
 
                     messages.append({
@@ -279,3 +293,74 @@ class MCPService:
     def is_connected(self) -> bool:
         """MCP接続状態を返す"""
         return self._is_connected
+
+    def _prepare_tool_result_content(self, result: Any) -> List[Dict[str, Any]]:
+        raw_content = self._extract_result_content(result)
+
+        if raw_content is None:
+            return [{"type": "text", "text": ""}]
+
+        if isinstance(raw_content, (list, tuple)):
+            blocks: List[Dict[str, Any]] = []
+            for item in raw_content:
+                blocks.extend(self._normalize_tool_content_item(item))
+            return blocks or [{"type": "text", "text": ""}]
+
+        return self._normalize_tool_content_item(raw_content)
+
+    def _normalize_tool_content_item(self, item: Any) -> List[Dict[str, Any]]:
+        if item is None:
+            return [{"type": "text", "text": ""}]
+
+        if isinstance(item, dict):
+            if "type" in item:
+                return [item]
+            if "text" in item:
+                return [{"type": "text", "text": str(item["text"])}]
+            return [{"type": "text", "text": json.dumps(item, ensure_ascii=False)}]
+
+        if hasattr(item, "model_dump"):
+            data = item.model_dump()
+            if "type" in data:
+                return [data]
+            if "text" in data:
+                return [{"type": "text", "text": str(data["text"])}]
+            return [{"type": "text", "text": json.dumps(data, ensure_ascii=False)}]
+
+        if hasattr(item, "to_dict"):
+            return self._normalize_tool_content_item(item.to_dict())
+
+        if hasattr(item, "type") and hasattr(item, "text"):
+            return [{"type": getattr(item, "type", "text"), "text": str(getattr(item, "text"))}]
+
+        if hasattr(item, "__dict__"):
+            data = {
+                key: value
+                for key, value in item.__dict__.items()
+                if not key.startswith("_")
+            }
+            if data:
+                return self._normalize_tool_content_item(data)
+
+        return [{"type": "text", "text": str(item)}]
+
+    def _extract_result_content(self, result: Any) -> Any:
+        if hasattr(result, "content"):
+            return result.content
+
+        if isinstance(result, dict) and "content" in result:
+            return result["content"]
+
+        return result
+
+    def _extract_is_error_flag(self, result: Any) -> bool:
+        if hasattr(result, "is_error"):
+            return bool(result.is_error)
+
+        if hasattr(result, "isError"):
+            return bool(result.isError)
+
+        if isinstance(result, dict) and "is_error" in result:
+            return bool(result["is_error"])
+
+        return False
