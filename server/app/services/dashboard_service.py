@@ -1,8 +1,10 @@
 import time
+
 from .bedrock_service import BedrockService
-from ..config.prompts import get_dashboard_system_prompt, CHART_SYSTEM_PROMPT
-from ..core.response_utils import extract_text_from_response
+from ..config.prompts import CHART_SYSTEM_PROMPT, get_dashboard_system_prompt
+from ..core.html_sanitizer import sanitize_chart_html
 from ..core.logging import get_dashboard_logger
+from ..core.response_utils import extract_text_from_response
 
 
 class DashboardService:
@@ -21,7 +23,13 @@ class DashboardService:
         )
 
         messages = [
-            {"role": "user", "content": f"以下の分析結果をHTML+CSS+Chart.jsを使ってダッシュボードとして可視化してください:\n\n{content}"}
+            {
+                "role": "user",
+                "content": (
+                    "以下の分析結果をHTML+CSS+Chart.jsを使ってダッシュボードとして可視化してください:\n\n"
+                    f"{content}"
+                )
+            }
         ]
 
         try:
@@ -30,7 +38,8 @@ class DashboardService:
                 system=get_dashboard_system_prompt()
             )
 
-            result = extract_text_from_response(response.content)
+            raw_result = extract_text_from_response(response.content)
+            result = sanitize_chart_html(raw_result)
             duration = time.time() - start_time
 
             self.logger.info(
@@ -62,7 +71,13 @@ class DashboardService:
         )
 
         messages = [
-            {"role": "user", "content": f"以下の分析結果から最適なチャートを1つ作成してください:\n\n{content}"}
+            {
+                "role": "user",
+                "content": (
+                    "以下の分析結果から最適なチャートを1つ作成してください:\n\n"
+                    f"{content}"
+                )
+            }
         ]
 
         try:
@@ -71,7 +86,8 @@ class DashboardService:
                 system=CHART_SYSTEM_PROMPT
             )
 
-            result = extract_text_from_response(response.content)
+            raw_result = extract_text_from_response(response.content)
+            result = sanitize_chart_html(raw_result)
             duration = time.time() - start_time
 
             self.logger.info(

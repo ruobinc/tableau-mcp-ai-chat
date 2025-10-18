@@ -12,7 +12,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { type FC } from 'react';
+import { type FC, memo, useMemo } from 'react';
 
 import MarkdownRenderer from '../../../components/markdown/MarkdownRenderer';
 import { formatTimestamp } from '../../../utils/date';
@@ -25,17 +25,24 @@ interface ChatMessageProps {
   onRequestChart: (message: ChatMessageType) => void;
   isCreatingReport?: boolean;
   isCreatingChart?: boolean;
+  previewAvailable: boolean;
+  chartCode?: string | null;
 }
 
-export const ChatMessage: FC<ChatMessageProps> = ({
+const ChatMessageComponent: FC<ChatMessageProps> = ({
   message,
   onRequestPreview,
   onRequestChart,
   isCreatingReport = false,
   isCreatingChart = false,
+  previewAvailable,
+  chartCode,
 }) => {
   const theme = useTheme();
-  const styles = createMessageStyles(theme, message.sender === 'user');
+  const styles = useMemo(
+    () => createMessageStyles(theme, message.sender === 'user'),
+    [theme, message.sender]
+  );
 
   return (
     <Box sx={styles.container}>
@@ -130,7 +137,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
           <Box sx={styles.actionButtons}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Tooltip
-                title={message.dashboardCode ? 'レポート再表示' : 'レポート作成'}
+                title={previewAvailable ? 'レポート再表示' : 'レポート作成'}
                 placement="top"
                 arrow
               >
@@ -139,15 +146,15 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                   onClick={() => onRequestPreview(message)}
                   disabled={isCreatingReport}
                   sx={{
-                    color: message.dashboardCode ? '#10b981' : '#3b82f6',
+                    color: previewAvailable ? '#10b981' : '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.05)',
                     border: '1px solid',
-                    borderColor: message.dashboardCode ? '#10b981' : '#3b82f6',
+                    borderColor: previewAvailable ? '#10b981' : '#3b82f6',
                     '&:hover': {
-                      backgroundColor: message.dashboardCode
+                      backgroundColor: previewAvailable
                         ? 'rgba(16, 185, 129, 0.1)'
                         : 'rgba(59, 130, 246, 0.1)',
-                      borderColor: message.dashboardCode ? '#059669' : '#2563eb',
+                      borderColor: previewAvailable ? '#059669' : '#2563eb',
                       transform: 'scale(1.05)',
                     },
                     '&:disabled': {
@@ -164,7 +171,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
 
               <Tooltip
                 title={
-                  message.chartCode
+                  chartCode
                     ? message.showChart
                       ? 'チャート非表示'
                       : 'チャート表示'
@@ -178,25 +185,21 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                   onClick={() => onRequestChart(message)}
                   disabled={isCreatingChart}
                   sx={{
-                    color: message.chartCode
-                      ? message.showChart
-                        ? '#f59e0b'
-                        : '#10b981'
-                      : '#8b5cf6',
+                    color: chartCode ? (message.showChart ? '#f59e0b' : '#10b981') : '#8b5cf6',
                     backgroundColor: 'rgba(139, 92, 246, 0.05)',
                     border: '1px solid',
-                    borderColor: message.chartCode
+                    borderColor: chartCode
                       ? message.showChart
                         ? '#f59e0b'
                         : '#10b981'
                       : '#8b5cf6',
                     '&:hover': {
-                      backgroundColor: message.chartCode
+                      backgroundColor: chartCode
                         ? message.showChart
                           ? 'rgba(245, 158, 11, 0.1)'
                           : 'rgba(16, 185, 129, 0.1)'
                         : 'rgba(139, 92, 246, 0.1)',
-                      borderColor: message.chartCode
+                      borderColor: chartCode
                         ? message.showChart
                           ? '#d97706'
                           : '#059669'
@@ -258,7 +261,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
           </Box>
         )}
 
-        {message.sender === 'bot' && message.showChart && message.chartCode && (
+        {message.sender === 'bot' && message.showChart && chartCode && (
           <Box sx={styles.chartContainer}>
             <Box sx={styles.chartHeader}>
               <Typography
@@ -277,7 +280,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
             </Box>
             <Box sx={styles.chartFrame}>
               <iframe
-                srcDoc={message.chartCode}
+                srcDoc={chartCode}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -300,3 +303,5 @@ export const ChatMessage: FC<ChatMessageProps> = ({
     </Box>
   );
 };
+
+export const ChatMessage = memo(ChatMessageComponent);
