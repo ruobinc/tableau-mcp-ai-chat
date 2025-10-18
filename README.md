@@ -1,12 +1,10 @@
 # Tableau MCP AI Chat
-
-Tableau ダッシュボードと Anthropic Claude を組み合わせて、日本語でのデータ分析会話を行うためのサンプルアプリです。フロントエンドは React、バックエンドは FastAPI で構成されています。
 Tableau MCPとAnthropic Claudeモデルを使って、会話型データ分析エージェントのアプリです。
 
 ## 主な機能
-- **データ分析チャット**: Tableauのデータソースやビューに対して、会話形式のデータ分析
+- **会話型データ分析エージェント**: [Tableau MCP](https://github.com/tableau/tableau-mcp)を活用し、Tableauのデータソースやビューに対して、会話形式のデータ分析
 - **ダッシュボード生成**: 生成した分析結果から Chart.js ベースのレポート作成とチャート作成
-- **ダッシュボードとPulse**: Tableau ダッシュボードとPulseを埋め込んでいます
+- **Tableau Embedded Analytics**: Tableau ダッシュボードとPulseをアプリ内に埋め込む
 
 ## 必要要件
 - Node.js 18 以上
