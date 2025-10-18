@@ -11,6 +11,7 @@ class AWSSettings(BaseModel):
     access_key: str | None = None
     secret_key: str | None = None
     session_token: str | None = None
+    bearer_token: str | None = None
 
 
 class BedrockSettings(BaseModel):
@@ -70,7 +71,8 @@ class Settings(BaseModel):
                 region=os.getenv("AWS_REGION", "ap-northeast-1"),
                 access_key=os.getenv("AWS_ACCESS_KEY_ID"),
                 secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-                session_token=os.getenv("AWS_SESSION_TOKEN")
+                session_token=os.getenv("AWS_SESSION_TOKEN"),
+                bearer_token=os.getenv("AWS_BEARER_TOKEN_BEDROCK")
             ),
             bedrock=BedrockSettings(
                 model_id=os.getenv("BEDROCK_MODEL_ID", "apac.anthropic.claude-sonnet-4-20250514-v1:0"),
