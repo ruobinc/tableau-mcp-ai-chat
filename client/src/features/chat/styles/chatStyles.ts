@@ -330,7 +330,8 @@ export const createMessageStyles = (theme: Theme, isUser: boolean) => ({
   },
 
   chartFrame: {
-    height: { xs: 460, md: 530 },
+    height: { xs: 360, md: 400 },
+    maxHeight: 400,
     overflow: 'hidden',
   },
 });

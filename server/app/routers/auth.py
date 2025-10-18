@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
+
+from ..dependencies import get_auth_service
 from ..models.requests import JWTRequest
 from ..models.responses import JWTResponse
 from ..services.auth_service import AuthService
-from ..dependencies import get_auth_service
 
 router = APIRouter(prefix="/api", tags=["auth"])
 

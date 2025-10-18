@@ -97,7 +97,6 @@ export const useChat = () => {
         ...prev,
         messages: remainingMessages,
         preview: shouldClosePreview ? { isOpen: false, messageId: null } : prev.preview,
-
       };
     });
   }, []);
@@ -183,47 +182,44 @@ export const useChat = () => {
     }));
   }, []);
 
-  const requestPreview = useCallback(
-    async (message: ChatMessage) => {
-      const cachedCode = previewCacheRef.current.get(message.id);
-      if (cachedCode) {
-        setState((prev) => ({
-          ...prev,
-          preview: {
-            isOpen: true,
-            messageId: message.id,
-          },
-        }));
-        return;
-      }
+  const requestPreview = useCallback(async (message: ChatMessage) => {
+    const cachedCode = previewCacheRef.current.get(message.id);
+    if (cachedCode) {
+      setState((prev) => ({
+        ...prev,
+        preview: {
+          isOpen: true,
+          messageId: message.id,
+        },
+      }));
+      return;
+    }
 
-      setState((prev) => ({ ...prev, isCreatingReport: true }));
+    setState((prev) => ({ ...prev, isCreatingReport: true }));
 
-      try {
-        const response = await postJson<CreateReportResponse, CreateReportRequest>({
-          url: apiEndpoints.createReport,
-          body: {
-            content: message.text,
-            timestamp: generateTimestamp(),
-          },
-        });
+    try {
+      const response = await postJson<CreateReportResponse, CreateReportRequest>({
+        url: apiEndpoints.createReport,
+        body: {
+          content: message.text,
+          timestamp: generateTimestamp(),
+        },
+      });
 
-        setState((prev) => ({
-          ...prev,
-          preview: {
-            isOpen: true,
-            messageId: message.id,
-          },
-        }));
-        previewCacheRef.current.set(message.id, response.code);
-      } catch (error) {
-        console.error('Report creation error:', error);
-      } finally {
-        setState((prev) => ({ ...prev, isCreatingReport: false }));
-      }
-    },
-    []
-  );
+      setState((prev) => ({
+        ...prev,
+        preview: {
+          isOpen: true,
+          messageId: message.id,
+        },
+      }));
+      previewCacheRef.current.set(message.id, response.code);
+    } catch (error) {
+      console.error('Report creation error:', error);
+    } finally {
+      setState((prev) => ({ ...prev, isCreatingReport: false }));
+    }
+  }, []);
 
   const requestChart = useCallback(
     async (message: ChatMessage) => {

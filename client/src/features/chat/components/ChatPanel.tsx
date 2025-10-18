@@ -239,7 +239,8 @@ export const ChatPanel: FC<ChatPanelProps> = ({
                 color="text.secondary"
                 sx={{ display: 'block', textAlign: 'center', mb: 2 }}
               >
-                最新 {visibleMessages.length} 件のメッセージを表示中。過去 {hiddenCount} 件は自動的に折りたたまれています。
+                最新 {visibleMessages.length} 件のメッセージを表示中。過去 {hiddenCount}{' '}
+                件は自動的に折りたたまれています。
               </Typography>
             )}
 
