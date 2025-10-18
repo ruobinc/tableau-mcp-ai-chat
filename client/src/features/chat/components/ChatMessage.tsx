@@ -39,10 +39,10 @@ const ChatMessageComponent: FC<ChatMessageProps> = ({
   chartCode,
 }) => {
   const theme = useTheme();
-  const styles = useMemo(() => createMessageStyles(theme, message.sender === 'user'), [
-    theme,
-    message.sender,
-  ]);
+  const styles = useMemo(
+    () => createMessageStyles(theme, message.sender === 'user'),
+    [theme, message.sender]
+  );
 
   return (
     <Box sx={styles.container}>
@@ -185,11 +185,7 @@ const ChatMessageComponent: FC<ChatMessageProps> = ({
                   onClick={() => onRequestChart(message)}
                   disabled={isCreatingChart}
                   sx={{
-                    color: chartCode
-                      ? message.showChart
-                        ? '#f59e0b'
-                        : '#10b981'
-                      : '#8b5cf6',
+                    color: chartCode ? (message.showChart ? '#f59e0b' : '#10b981') : '#8b5cf6',
                     backgroundColor: 'rgba(139, 92, 246, 0.05)',
                     border: '1px solid',
                     borderColor: chartCode
