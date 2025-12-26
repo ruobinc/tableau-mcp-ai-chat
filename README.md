@@ -30,16 +30,17 @@ Tableau MCPとAnthropic Claudeモデルを使って、会話型データ分析�
    npm install
    npm run dev
    ```
-4. 初回起動時の設定:
+4. Tableau MCPのセットアップ:
+   ```bash
+   git clone https://github.com/tableau/tableau-mcp.git tableau-mcp
+   cd tableau-mcp
+   npm install
+   npm run build
+   ```
+5. 初回起動時の設定:
    - ブラウザで http://localhost:5173 にアクセス
    - ページ右上のメニューから「Bedrock設定」を選択
-   - AWS Bedrock認証情報を入力・保存（LocalStorageに保存されます）
-     - AWSリージョン（例: ap-northeast-1）
-     - AWS Bearer Token
-     - BedrockモデルID（例: apac.anthropic.claude-sonnet-4-20250514-v1:0）
-     - Max Tokens（100〜200000）
-   - 「接続テスト」で設定を検証してから保存してください
-
+   - AWS Bedrock認証情報を入力・保存
 
 ## 主なディレクトリ
 - `client/` – React + TypeScript フロントエンド
