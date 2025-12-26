@@ -1,21 +1,17 @@
 import os
 from functools import lru_cache
+from pathlib import Path
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-class AWSSettings(BaseModel):
-    region: str = "ap-northeast-1"
-    access_key: str | None = None
-    secret_key: str | None = None
-    session_token: str | None = None
-
-
-class BedrockSettings(BaseModel):
-    model_id: str = "apac.anthropic.claude-sonnet-4-20250514-v1:0"
-    max_tokens: int = 10000
+def _parse_csv_env(value: str | None, fallback: list[str]) -> list[str]:
+    if not value:
+        return fallback
+    items = [item.strip() for item in value.split(",") if item.strip()]
+    return items or fallback
 
 
 class TableauSettings(BaseModel):
@@ -43,11 +39,7 @@ class MCPSettings(BaseModel):
 
 
 class CORSSettings(BaseModel):
-    allowed_origins: list[str] = [
-        "http://localhost:3000",
-        "http://localhost:3002",
-        "http://localhost:5173"
-    ]
+    allowed_origins: list[str] = []
     allow_credentials: bool = True
     allow_methods: list[str] = ["*"]
     allow_headers: list[str] = ["*"]
@@ -57,8 +49,6 @@ class Settings(BaseModel):
     app_title: str = "Tableau AI Chat API"
     app_version: str = "1.0.0"
 
-    aws: AWSSettings
-    bedrock: BedrockSettings
     tableau: TableauSettings
     mcp: MCPSettings
     logging: LoggingSettings
@@ -66,16 +56,6 @@ class Settings(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__(
-            aws=AWSSettings(
-                region=os.getenv("AWS_REGION", "ap-northeast-1"),
-                access_key=os.getenv("AWS_ACCESS_KEY_ID"),
-                secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-                session_token=os.getenv("AWS_SESSION_TOKEN")
-            ),
-            bedrock=BedrockSettings(
-                model_id=os.getenv("BEDROCK_MODEL_ID", "apac.anthropic.claude-sonnet-4-20250514-v1:0"),
-                max_tokens=int(os.getenv("MAX_TOKENS", "10000"))
-            ),
             tableau=TableauSettings(
                 connected_app_client_id=os.getenv("TABLEAU_CONNECTED_APP_CLIENT_ID"),
                 connected_app_client_secret=os.getenv("TABLEAU_CONNECTED_APP_CLIENT_SECRET"),
@@ -96,7 +76,12 @@ class Settings(BaseModel):
                 use_structured=os.getenv("LOG_STRUCTURED", "false").lower() == "true",
                 enable_performance_logs=os.getenv("LOG_PERFORMANCE", "true").lower() == "true"
             ),
-            cors=CORSSettings(),
+            cors=CORSSettings(
+                allowed_origins=_parse_csv_env(
+                    os.getenv("CORS_ALLOWED_ORIGINS"),
+                    CORSSettings().allowed_origins
+                )
+            ),
             **kwargs
         )
 

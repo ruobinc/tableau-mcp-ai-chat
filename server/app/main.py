@@ -4,35 +4,25 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from .config.settings import get_settings
-from .dependencies import get_mcp_service
 from .core.exceptions import (
     CustomException,
     custom_exception_handler,
     general_exception_handler
 )
 from .routers import chat, dashboard, auth
+from .routers import settings as settings_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    mcp_service = get_mcp_service()
-
-    # Try to connect to MCP server (optional - may fail if server not available)
-    try:
-        success = await mcp_service.connect()
-        if success:
-            print("MCP server connected successfully")
-        else:
-            print("Will use simple mode without Tableau integration")
-    except Exception as e:
-        print(f"Warning: Could not connect to MCP server: {e}")
-        print("Will use simple mode without Tableau integration")
+    print("Tableau AI Chat API starting up...")
+    # MCP接続は各リクエストごとに行う（Bedrock設定が必要なため）
 
     yield
 
     # Shutdown
-    await mcp_service.cleanup()
+    print("Tableau AI Chat API shutting down...")
 
 
 def create_app() -> FastAPI:
@@ -61,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(chat.router)
     app.include_router(dashboard.router)
     app.include_router(auth.router)
+    app.include_router(settings_router.router)
 
     @app.get("/")
     async def root():

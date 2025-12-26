@@ -27,6 +27,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDarkMode } from '../../contexts/DarkModeContext';
+import BedrockSettingsModal from '../../features/settings/components/BedrockSettingsModal';
 import { createNavigationStyles } from './navigation-styles';
 
 interface NavigationProps {
@@ -37,6 +38,7 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   const theme = useTheme();
   const { darkMode, toggleDarkMode } = useDarkMode();
@@ -159,13 +161,18 @@ const Navigation: React.FC<NavigationProps> = ({ title }) => {
           },
         }}
       >
-        <MenuItem onClick={handleMenuClose} sx={styles.menuItem}>
-          プロフィール
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose} sx={styles.menuItem}>
-          アカウント設定
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            setSettingsOpen(true);
+          }}
+          sx={styles.menuItem}
+        >
+          Bedrock設定
         </MenuItem>
       </Menu>
+
+      <BedrockSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   );
 };

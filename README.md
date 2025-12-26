@@ -7,7 +7,7 @@ Tableau MCPとAnthropic Claudeモデルを使って、会話型データ分析�
 - **Tableau Embedded Analytics**: Tableau ダッシュボードとPulseをアプリ内に埋め込む
 
 ## 必要要件
-- Node.js 18 以上
+- Node.js 22 以上
 - Python 3.13 以上 + [uv](https://github.com/astral-sh/uv)
 - AWS Bedrock Claude-4以降モデルと Tableau Server/Cloud へのアクセス
 
@@ -21,7 +21,7 @@ Tableau MCPとAnthropic Claudeモデルを使って、会話型データ分析�
    ```bash
    cd server
    uv sync
-   cp .env.example app/.env  # 資格情報を設定
+   cp .env.example .env
    uv run uvicorn app.main:app --reload
    ```
 3. フロントエンド:
@@ -30,13 +30,17 @@ Tableau MCPとAnthropic Claudeモデルを使って、会話型データ分析�
    npm install
    npm run dev
    ```
+4. 初回起動時の設定:
+   - ブラウザで http://localhost:5173 にアクセス
+   - ページ右上のメニューから「Bedrock設定」を選択
+   - AWS Bedrock認証情報を入力・保存（LocalStorageに保存されます）
+     - AWSリージョン（例: ap-northeast-1）
+     - AWS Bearer Token
+     - BedrockモデルID（例: apac.anthropic.claude-sonnet-4-20250514-v1:0）
+     - Max Tokens（100〜200000）
+   - 「接続テスト」で設定を検証してから保存してください
 
-フロントエンドは http://localhost:5173、API は http://localhost:8000 で動作します。
 
 ## 主なディレクトリ
 - `client/` – React + TypeScript フロントエンド
 - `server/` – FastAPI バックエンド
-
-## ライセンス
-MIT License
-

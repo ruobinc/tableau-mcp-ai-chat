@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { apiEndpoints } from '../../../config/api';
 import { CHAT_CONFIG } from '../../../config/constants';
+import { useBedrockSettings } from '../../../contexts/BedrockSettingsContext';
 import { postJson } from '../../../lib/http';
 import { generateId, generateTimestamp } from '../../../utils/date';
 import { ChatHookState, ChatMessage } from '../types';
@@ -14,6 +15,10 @@ interface ApiChatMessage {
 interface SendMessageRequest {
   messages: ApiChatMessage[];
   timestamp: string;
+  aws_region: string;
+  aws_bearer_token: string;
+  bedrock_model_id: string;
+  max_tokens: number;
 }
 
 interface SendMessageResponse {
@@ -25,6 +30,10 @@ interface SendMessageResponse {
 interface CreateReportRequest {
   content: string;
   timestamp: string;
+  aws_region: string;
+  aws_bearer_token: string;
+  bedrock_model_id: string;
+  max_tokens: number;
 }
 
 interface CreateReportResponse {
@@ -36,6 +45,10 @@ interface CreateReportResponse {
 interface CreateChartRequest {
   content: string;
   timestamp: string;
+  aws_region: string;
+  aws_bearer_token: string;
+  bedrock_model_id: string;
+  max_tokens: number;
 }
 
 interface CreateChartResponse {
@@ -45,6 +58,7 @@ interface CreateChartResponse {
 }
 
 export const useChat = () => {
+  const { settings, hasSettings } = useBedrockSettings();
   const [state, setState] = useState<ChatHookState>({
     messages: [],
     input: '',
@@ -105,6 +119,15 @@ export const useChat = () => {
     async (message: string) => {
       if (!message.trim() || state.isLoading) return;
 
+      // Bedrock設定のチェック
+      if (!hasSettings || !settings) {
+        addMessage({
+          text: 'Bedrock設定が未設定です。ページ上部の設定ボタンから設定を行ってください。',
+          sender: 'bot',
+        });
+        return;
+      }
+
       // 前のリクエストをキャンセル
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -145,6 +168,10 @@ export const useChat = () => {
           body: {
             messages: allMessages,
             timestamp: generateTimestamp(),
+            aws_region: settings.awsRegion,
+            aws_bearer_token: settings.awsBearerToken,
+            bedrock_model_id: settings.bedrockModelId,
+            max_tokens: settings.maxTokens,
           },
           signal: abortControllerRef.current?.signal,
         });
@@ -172,7 +199,7 @@ export const useChat = () => {
         abortControllerRef.current = null;
       }
     },
-    [state.isLoading, state.messages, addMessage]
+    [state.isLoading, state.messages, addMessage, hasSettings, settings]
   );
 
   const updateMessage = useCallback((messageId: number, updates: Partial<ChatMessage>) => {
@@ -182,44 +209,57 @@ export const useChat = () => {
     }));
   }, []);
 
-  const requestPreview = useCallback(async (message: ChatMessage) => {
-    const cachedCode = previewCacheRef.current.get(message.id);
-    if (cachedCode) {
-      setState((prev) => ({
-        ...prev,
-        preview: {
-          isOpen: true,
-          messageId: message.id,
-        },
-      }));
-      return;
-    }
+  const requestPreview = useCallback(
+    async (message: ChatMessage) => {
+      const cachedCode = previewCacheRef.current.get(message.id);
+      if (cachedCode) {
+        setState((prev) => ({
+          ...prev,
+          preview: {
+            isOpen: true,
+            messageId: message.id,
+          },
+        }));
+        return;
+      }
 
-    setState((prev) => ({ ...prev, isCreatingReport: true }));
+      // Bedrock設定のチェック
+      if (!hasSettings || !settings) {
+        console.error('Bedrock settings not configured');
+        return;
+      }
 
-    try {
-      const response = await postJson<CreateReportResponse, CreateReportRequest>({
-        url: apiEndpoints.createReport,
-        body: {
-          content: message.text,
-          timestamp: generateTimestamp(),
-        },
-      });
+      setState((prev) => ({ ...prev, isCreatingReport: true }));
 
-      setState((prev) => ({
-        ...prev,
-        preview: {
-          isOpen: true,
-          messageId: message.id,
-        },
-      }));
-      previewCacheRef.current.set(message.id, response.code);
-    } catch (error) {
-      console.error('Report creation error:', error);
-    } finally {
-      setState((prev) => ({ ...prev, isCreatingReport: false }));
-    }
-  }, []);
+      try {
+        const response = await postJson<CreateReportResponse, CreateReportRequest>({
+          url: apiEndpoints.createReport,
+          body: {
+            content: message.text,
+            timestamp: generateTimestamp(),
+            aws_region: settings.awsRegion,
+            aws_bearer_token: settings.awsBearerToken,
+            bedrock_model_id: settings.bedrockModelId,
+            max_tokens: settings.maxTokens,
+          },
+        });
+
+        setState((prev) => ({
+          ...prev,
+          preview: {
+            isOpen: true,
+            messageId: message.id,
+          },
+        }));
+        previewCacheRef.current.set(message.id, response.code);
+      } catch (error) {
+        console.error('Report creation error:', error);
+      } finally {
+        setState((prev) => ({ ...prev, isCreatingReport: false }));
+      }
+    },
+    [hasSettings, settings]
+  );
 
   const requestChart = useCallback(
     async (message: ChatMessage) => {
@@ -227,6 +267,12 @@ export const useChat = () => {
       if (cachedCode) {
         // 既にチャートがある場合は表示状態をトグル
         updateMessage(message.id, { showChart: !message.showChart });
+        return;
+      }
+
+      // Bedrock設定のチェック
+      if (!hasSettings || !settings) {
+        console.error('Bedrock settings not configured');
         return;
       }
 
@@ -238,6 +284,10 @@ export const useChat = () => {
           body: {
             content: message.text,
             timestamp: generateTimestamp(),
+            aws_region: settings.awsRegion,
+            aws_bearer_token: settings.awsBearerToken,
+            bedrock_model_id: settings.bedrockModelId,
+            max_tokens: settings.maxTokens,
           },
         });
 
@@ -253,7 +303,7 @@ export const useChat = () => {
         setState((prev) => ({ ...prev, isCreatingChart: false }));
       }
     },
-    [updateMessage]
+    [updateMessage, hasSettings, settings]
   );
 
   const setInput = useCallback((value: string) => {

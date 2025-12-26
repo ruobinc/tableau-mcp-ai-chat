@@ -1,4 +1,5 @@
 import { LOCAL_STORAGE_KEYS } from '../config/constants';
+import { BedrockSettings } from '../types/bedrock-settings';
 
 export const storage = {
   getDarkMode: (): boolean | null => {
@@ -8,6 +9,19 @@ export const storage = {
 
   setDarkMode: (value: boolean): void => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.DARK_MODE, JSON.stringify(value));
+  },
+
+  getBedrockSettings: (): BedrockSettings | null => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.BEDROCK_SETTINGS);
+    return saved ? JSON.parse(saved) : null;
+  },
+
+  setBedrockSettings: (settings: BedrockSettings): void => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.BEDROCK_SETTINGS, JSON.stringify(settings));
+  },
+
+  clearBedrockSettings: (): void => {
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.BEDROCK_SETTINGS);
   },
 
   getJwtToken: (username: string): string | null => {
