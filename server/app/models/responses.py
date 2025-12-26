@@ -16,3 +16,8 @@ class ChatResponse(BaseModel):
 class JWTResponse(BaseModel):
     token: str
     success: bool
+
+
+class ValidationResponse(BaseModel):
+    valid: bool
+    message: str

@@ -3,7 +3,7 @@ import { Box, Paper, Typography, useTheme } from '@mui/material';
 
 import { pulseMetrics, pulseSiteName, tableauUserName } from '../config/tableau';
 import { TableauPulseEmbed } from '../features/tableau/components';
-import { EmptyMetricsState, JWTPageWrapper, MetricCard, PageHeader } from './components';
+import { EmptyMetricsState, JWTPageWrapper, MetricCard } from './components';
 import { createPageStyles } from './styles/page-styles';
 
 const PulsePage = () => {
@@ -13,8 +13,6 @@ const PulsePage = () => {
   return (
     <JWTPageWrapper username={tableauUserName}>
       <Box sx={styles.pageContainer}>
-        <PageHeader icon={<TrendingUpIcon />} title="Tableau Pulse メトリクス" />
-
         <Box sx={styles.mainContent}>
           {pulseMetrics.length > 0 ? (
             <>

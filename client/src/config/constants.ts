@@ -3,6 +3,7 @@ export const LOCAL_STORAGE_KEYS = {
   JWT_TOKEN_PREFIX: 'jwt-token-',
   CHAT_HISTORY: 'chatHistory',
   USER_PREFERENCES: 'userPreferences',
+  BEDROCK_SETTINGS: 'bedrockSettings',
 } as const;
 
 export const APP_CONFIG = {

@@ -13,13 +13,17 @@ from ..core.logging import get_mcp_logger
 
 
 class MCPService:
-    def __init__(self, settings: Settings, bedrock_service: BedrockService):
+    def __init__(self, settings: Settings):
         self.settings = settings
-        self.bedrock_service = bedrock_service
+        self.bedrock_service: Optional[BedrockService] = None
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self._is_connected = False
         self.logger = get_mcp_logger()
+
+    def set_bedrock_service(self, bedrock_service: BedrockService):
+        """BedrockServiceを動的に設定"""
+        self.bedrock_service = bedrock_service
 
     async def connect(self) -> bool:
         """MCPサーバーに接続を試行"""

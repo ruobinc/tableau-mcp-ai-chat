@@ -2,6 +2,7 @@ import { Box, CssBaseline, ThemeProvider } from '@mui/material';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import Navigation from './components/navigation/Navigation';
+import { BedrockSettingsProvider } from './contexts/BedrockSettingsContext';
 import { DarkModeProvider, useDarkMode } from './contexts/DarkModeContext';
 import { getMainRoutes } from './routes';
 import { createAppTheme } from './theme/theme';
@@ -40,7 +41,9 @@ function AppContent() {
 function App() {
   return (
     <DarkModeProvider>
-      <AppContent />
+      <BedrockSettingsProvider>
+        <AppContent />
+      </BedrockSettingsProvider>
     </DarkModeProvider>
   );
 }

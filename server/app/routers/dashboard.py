@@ -1,10 +1,10 @@
 import time
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from ..models.requests import CreateReportRequest
 from ..models.responses import CreateReportResponse
+from ..services.bedrock_service import BedrockService
 from ..services.dashboard_service import DashboardService
-from ..dependencies import get_dashboard_service
 from ..core.response_utils import create_error_message
 from ..core.logging import get_api_logger
 
@@ -13,10 +13,7 @@ logger = get_api_logger()
 
 
 @router.post("/create_report", response_model=CreateReportResponse)
-async def create_report(
-    request: CreateReportRequest,
-    dashboard_service: DashboardService = Depends(get_dashboard_service)
-) -> CreateReportResponse:
+async def create_report(request: CreateReportRequest) -> CreateReportResponse:
     """レポート作成"""
     start_time = time.time()
     request_id = str(uuid.uuid4())
@@ -32,6 +29,17 @@ async def create_report(
     )
 
     try:
+        # BedrockServiceをインスタンス化
+        bedrock_service = BedrockService(
+            aws_region=request.aws_region,
+            aws_bearer_token=request.aws_bearer_token,
+            bedrock_model_id=request.bedrock_model_id,
+            max_tokens=request.max_tokens
+        )
+
+        # DashboardServiceをインスタンス化
+        dashboard_service = DashboardService(bedrock_service)
+
         response_text = await dashboard_service.generate_dashboard_code(request.content)
         duration = time.time() - start_time
 
@@ -68,10 +76,7 @@ async def create_report(
 
 
 @router.post("/create_chart", response_model=CreateReportResponse)
-async def create_chart(
-    request: CreateReportRequest,
-    dashboard_service: DashboardService = Depends(get_dashboard_service)
-) -> CreateReportResponse:
+async def create_chart(request: CreateReportRequest) -> CreateReportResponse:
     """チャート作成"""
     start_time = time.time()
     request_id = str(uuid.uuid4())
@@ -87,6 +92,17 @@ async def create_chart(
     )
 
     try:
+        # BedrockServiceをインスタンス化
+        bedrock_service = BedrockService(
+            aws_region=request.aws_region,
+            aws_bearer_token=request.aws_bearer_token,
+            bedrock_model_id=request.bedrock_model_id,
+            max_tokens=request.max_tokens
+        )
+
+        # DashboardServiceをインスタンス化
+        dashboard_service = DashboardService(bedrock_service)
+
         response_text = await dashboard_service.generate_chart_code(request.content)
         duration = time.time() - start_time
 
